@@ -168,3 +168,4 @@ Route::get('/{slug}', [HomeController::class, 'courseDetails'])
      ->where('slug', '[a-zA-Z0-9\-]+')
      ->name('course.details');
 
+});
