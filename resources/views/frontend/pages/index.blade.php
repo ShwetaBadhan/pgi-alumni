@@ -11,10 +11,10 @@
                     <!-- Start Single Banner  -->
                     <div class="swiper-slide">
                         <div class="rbt-banner-item bg_image">
-                            <div class="shape-1">
+                            {{-- <div class="shape-1">
                                 <img src="assets/images/shape/m-banner-shape-01.png" alt="Shape">
-                            </div>
-                            <img src="assets/images/banner/pgi-slider.jpg" alt="">
+                            </div> --}}
+                            <img src="assets/images/banner/pgi-slider.jpg" alt="" style="width:1355px;">
                         </div>
                     </div>
                     <!-- End Single Banner  -->
