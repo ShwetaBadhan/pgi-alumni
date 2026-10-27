@@ -107,25 +107,7 @@
                 </ul>
             </li>
 
-            {{-- Settings (Dropdown) --}}
-
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <i class="ri-user-settings-line"></i>
-                    <span>Settings</span>
-                </a>
-                <ul class="sidebar-submenu">
-
-                    <li>
-                        <a href="{{ route('general-settings') }}">
-                            <i class="ri-circle-fill circle-icon w-auto"></i>
-                            General
-                        </a>
-                    </li>
-
-                </ul>
-            </li>
-
+           
         </ul>
     </div>
 </aside>
