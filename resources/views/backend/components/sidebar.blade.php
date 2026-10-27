@@ -73,6 +73,55 @@
 
                 </ul>
             </li>
+            {{-- <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <i class="ri-graduation-cap-line"></i>
+                    <span>Abstract</span>
+                </a>
+                <ul class="sidebar-submenu">
+
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'membership']) }}"
+                            class="{{ request('filter') == 'membership' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Abstract Submission
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'summit']) }}"
+                            class="{{ request('filter') == 'summit' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            My Review Queue
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
+                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Reviewer Assignement
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
+                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Abstract Categories
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
+                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Abstract Themes
+                        </a>
+                    </li>
+
+                </ul>
+            </li> --}}
 
 
 

@@ -14,7 +14,7 @@
                             {{-- <div class="shape-1">
                                 <img src="assets/images/shape/m-banner-shape-01.png" alt="Shape">
                             </div> --}}
-                            <img src="assets/images/banner/pgi-slider.jpg" alt="" style="width:1355px;">
+                            <img src="assets/images/banner/pgi-slider.jpg" alt="" style="width:100% !important;">
                         </div>
                     </div>
                     <!-- End Single Banner  -->
