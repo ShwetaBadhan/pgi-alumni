@@ -39,98 +39,92 @@
             </li>
 
             {{-- Alumni (Dropdown) --}}
-         
-                <li class="dropdown">
-                    <a href="javascript:void(0)">
-                        <i class="ri-graduation-cap-line"></i>
-                        <span>Alumni</span>
-                    </a>
-                    <ul class="sidebar-submenu">
-                       
-                          <li>
-    <a href="{{ route('alumni-registrations.index', ['filter' => 'membership']) }}" class="{{ request('filter') == 'membership' ? 'active-menu' : '' }}">
-        <i class="ri-circle-fill circle-icon w-auto"></i>
-        Membership
-    </a>
-</li>
 
-<li>
-    <a href="{{ route('alumni-registrations.index', ['filter' => 'summit']) }}" class="{{ request('filter') == 'summit' ? 'active-menu' : '' }}">
-        <i class="ri-circle-fill circle-icon w-auto"></i>
-        Membership + Global Summit
-    </a>
-</li>
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <i class="ri-graduation-cap-line"></i>
+                    <span>Alumni</span>
+                </a>
+                <ul class="sidebar-submenu">
 
-<li>
-    <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}" class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
-        <i class="ri-circle-fill circle-icon w-auto"></i>
-        Accommodation
-    </a>
-</li>
-                       
-                    </ul>
-                </li>
-           
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'membership']) }}"
+                            class="{{ request('filter') == 'membership' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Membership
+                        </a>
+                    </li>
 
-            {{-- Administration (Dropdown) --}}
-            @canany(['user-view', 'role-view', 'permission-view'])
-                <li class="dropdown">
-                    <a href="javascript:void(0)">
-                        <i class="ri-graduation-cap-line"></i>
-                        <span>Administration</span>
-                    </a>
-                    <ul class="sidebar-submenu">
-                        @can('user-view')
-                            <li>
-                                <a href="{{ route('users.index') }}">
-                                    <i class="ri-circle-fill circle-icon w-auto"></i>
-                                    Admin Users
-                                </a>
-                            </li>
-                        @endcan
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'summit']) }}"
+                            class="{{ request('filter') == 'summit' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Membership + Global Summit
+                        </a>
+                    </li>
 
-                        @can('role-view')
-                            <li>
-                                <a href="{{ route('roles.index') }}">
-                                    <i class="ri-circle-fill circle-icon w-auto"></i>
-                                    Roles
-                                </a>
-                            </li>
-                        @endcan
+                    <li>
+                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
+                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Accommodation
+                        </a>
+                    </li>
 
-                        @can('permission-view')
-                            <li>
-                                <a href="{{ route('permissions.index') }}">
-                                    <i class="ri-circle-fill circle-icon w-auto"></i>
-                                    Permissions
-                                </a>
-                            </li>
-                        @endcan
-                    </ul>
-                </li>
-            @endcanany
+                </ul>
+            </li>
+
+
+
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <i class="ri-graduation-cap-line"></i>
+                    <span>Administration</span>
+                </a>
+                <ul class="sidebar-submenu">
+
+                    <li>
+                        <a href="{{ route('users.index') }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Admin Users
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('roles.index') }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Roles
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('permissions.index') }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            Permissions
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
 
             {{-- Settings (Dropdown) --}}
-            @canany(['setting-view', 'seo-view'])
-                <li class="dropdown">
-                    <a href="javascript:void(0)">
-                        <i class="ri-user-settings-line"></i>
-                        <span>Settings</span>
-                    </a>
-                    <ul class="sidebar-submenu">
-                        @can('setting-view')
-                            <li>
-                                <a href="{{ route('general-settings') }}">
-                                    <i class="ri-circle-fill circle-icon w-auto"></i>
-                                    General
-                                </a>
-                            </li>
-                        @endcan
 
-                        
-                    </ul>
-                </li>
-            @endcanany
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <i class="ri-user-settings-line"></i>
+                    <span>Settings</span>
+                </a>
+                <ul class="sidebar-submenu">
+
+                    <li>
+                        <a href="{{ route('general-settings') }}">
+                            <i class="ri-circle-fill circle-icon w-auto"></i>
+                            General
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
 
         </ul>
     </div>
