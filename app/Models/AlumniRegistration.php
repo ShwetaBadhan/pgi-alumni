@@ -123,4 +123,8 @@ class AlumniRegistration extends Authenticatable
             }
         });
     }
+    public function accompanyingPersons()
+    {
+        return $this->hasMany(AccompanyingPerson::class, 'registration_id');
+    }
 }

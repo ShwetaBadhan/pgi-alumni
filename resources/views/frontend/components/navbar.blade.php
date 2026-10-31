@@ -32,9 +32,9 @@
 
                         <div class="header-info">
                             <div class="header-right-btn d-flex">
-                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="#">
-                                    <span data-text="Submit Abstract">Submit Abstract</span>
-                                </a>
+                               <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="{{ route('alumni.abstract.create') }}">
+    <span data-text="Submit Abstract">Submit Abstract</span>
+</a>
                             </div>
                         </div>
                         <div class="rbt-separator"></div>

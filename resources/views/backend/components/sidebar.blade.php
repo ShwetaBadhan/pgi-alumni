@@ -73,7 +73,7 @@
 
                 </ul>
             </li>
-            {{-- <li class="dropdown">
+            <li class="dropdown">
                 <a href="javascript:void(0)">
                     <i class="ri-graduation-cap-line"></i>
                     <span>Abstract</span>
@@ -81,47 +81,44 @@
                 <ul class="sidebar-submenu">
 
                     <li>
-                        <a href="{{ route('alumni-registrations.index', ['filter' => 'membership']) }}"
-                            class="{{ request('filter') == 'membership' ? 'active-menu' : '' }}">
-                            <i class="ri-circle-fill circle-icon w-auto"></i>
-                            Abstract Submission
-                        </a>
+                       <a href="{{ route('abstract.submissions.index') }}">
+                    <i class="ri-circle-fill circle-icon w-auto"></i>
+                    <span>Abstract Submissions</span>
+                </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('alumni-registrations.index', ['filter' => 'summit']) }}"
-                            class="{{ request('filter') == 'summit' ? 'active-menu' : '' }}">
+                        <a href="{{ route('abstract.reviewers.index') }}">
+                          
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             My Review Queue
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
-                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                        <a href="{{ route('alumni-registrations.index') }}">
+                            
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             Reviewer Assignement
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
-                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                        <a href="{{ route('abstract.categories.index') }}">
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             Abstract Categories
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('alumni-registrations.index', ['filter' => 'accommodation']) }}"
-                            class="{{ request('filter') == 'accommodation' ? 'active-menu' : '' }}">
+                        <a href="{{ route('abstract.themes.index') }}">
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             Abstract Themes
                         </a>
                     </li>
 
                 </ul>
-            </li> --}}
+            </li>
 
 
 
@@ -152,6 +149,24 @@
                             Permissions
                         </a>
                     </li>
+
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <i class="ri-graduation-cap-line"></i>
+                    <span>Settings</span>
+                </a>
+                <ul class="sidebar-submenu">
+
+                   <li>
+    <a href="{{ route('accompanying-rate') }}">
+        <i class="ri-circle-fill circle-icon w-auto"></i>
+        Accompanying Rate
+    </a>
+</li>
+
+                 
 
                 </ul>
             </li>

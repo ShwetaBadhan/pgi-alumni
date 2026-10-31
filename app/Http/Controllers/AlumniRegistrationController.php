@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\AlumniRegistration;
 use App\Models\RegistrationType;
+use App\Models\AccompanyingPersonRate;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,45 +21,45 @@ class AlumniRegistrationController extends Controller
     /**
      * Display a listing of the resource (Admin Index).
      */
-  public function index(Request $request)
-{
-    $query = AlumniRegistration::with('registrationType');
-    $filter = $request->input('filter');
-    $status = $request->input('status'); // ✅ New Status Filter
+    public function index(Request $request)
+    {
+        $query = AlumniRegistration::with('registrationType');
+        $filter = $request->input('filter');
+        $status = $request->input('status'); // ✅ New Status Filter
 
-    // 1. Category Filter Logic
-    if ($filter === 'membership') {
-        $query->whereHas('registrationType', function ($q) {
-            $q->where('name', 'like', '%Membership%')->where('name', 'not like', '%Summit%');
-        });
-    } elseif ($filter === 'summit') {
-        $query->whereHas('registrationType', function ($q) {
-            $q->where('name', 'like', '%Summit%');
-        });
-    } elseif ($filter === 'accommodation') {
-        $query->where('has_accompanying_person', true);
+        // 1. Category Filter Logic
+        if ($filter === 'membership') {
+            $query->whereHas('registrationType', function ($q) {
+                $q->where('name', 'like', '%Membership%')->where('name', 'not like', '%Summit%');
+            });
+        } elseif ($filter === 'summit') {
+            $query->whereHas('registrationType', function ($q) {
+                $q->where('name', 'like', '%Summit%');
+            });
+        } elseif ($filter === 'accommodation') {
+            $query->where('has_accompanying_person', true);
+        }
+
+        // 2. ✅ NEW: Status Filter Logic
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // 3. Search Logic
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('contact_number', 'like', "%{$search}%");
+            });
+        }
+
+        $registrations = $query->latest()->paginate(10);
+
+        return view('backend.pages.alumni-registrations.index', compact('registrations', 'filter'));
     }
-
-    // 2. ✅ NEW: Status Filter Logic
-    if ($status) {
-        $query->where('status', $status);
-    }
-
-    // 3. Search Logic
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('firstname', 'like', "%{$search}%")
-                ->orWhere('lastname', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('contact_number', 'like', "%{$search}%");
-        });
-    }
-
-    $registrations = $query->latest()->paginate(10);
-
-    return view('backend.pages.alumni-registrations.index', compact('registrations', 'filter'));
-}
 
     /**
      * Display the specified resource (Admin Show).
@@ -851,13 +853,418 @@ class AlumniRegistrationController extends Controller
     }
 
     public function export(Request $request)
-{
-    $filename = 'alumni_registrations_' . date('Y-m-d') . '.xlsx';
-    
-    if ($request->has('filter')) {
-        $filename = 'alumni_' . $request->filter . '_' . date('Y-m-d') . '.xlsx';
+    {
+        $filename = 'alumni_registrations_' . date('Y-m-d') . '.xlsx';
+
+        if ($request->has('filter')) {
+            $filename = 'alumni_' . $request->filter . '_' . date('Y-m-d') . '.xlsx';
+        }
+
+        return Excel::download(new AlumniRegistrationsExport($request), $filename);
     }
 
-    return Excel::download(new AlumniRegistrationsExport($request), $filename);
+
+    public function showRegistrationForm() // Method ka naam aapke hisaab se alag ho sakta hai
+    {
+        $saarcCountries = ['Afghanistan', 'Bangladesh', 'Bhutan', 'India', 'Maldives', 'Nepal', 'Pakistan', 'Sri Lanka'];
+
+
+        $countries = [
+            'Afghanistan',
+            'Albania',
+            'Algeria',
+            'Andorra',
+            'Angola',
+            'Antigua and Barbuda',
+            'Argentina',
+            'Armenia',
+            'Australia',
+            'Austria',
+            'Azerbaijan',
+            'Bahamas',
+            'Bahrain',
+            'Bangladesh',
+            'Barbados',
+            'Belarus',
+            'Belgium',
+            'Belize',
+            'Benin',
+            'Bhutan',
+            'Bolivia',
+            'Bosnia and Herzegovina',
+            'Botswana',
+            'Brazil',
+            'Brunei',
+            'Bulgaria',
+            'Burkina Faso',
+            'Burundi',
+            'Cabo Verde',
+            'Cambodia',
+            'Cameroon',
+            'Canada',
+            'Central African Republic',
+            'Chad',
+            'Chile',
+            'China',
+            'Colombia',
+            'Comoros',
+            'Congo (Congo-Brazzaville)',
+            'Costa Rica',
+            'Croatia',
+            'Cuba',
+            'Cyprus',
+            'Czechia (Czech Republic)',
+            'Democratic Republic of the Congo',
+            'Denmark',
+            'Djibouti',
+            'Dominica',
+            'Dominican Republic',
+            'Ecuador',
+            'Egypt',
+            'El Salvador',
+            'Equatorial Guinea',
+            'Eritrea',
+            'Estonia',
+            'Eswatini',
+            'Ethiopia',
+            'Fiji',
+            'Finland',
+            'France',
+            'Gabon',
+            'Gambia',
+            'Georgia',
+            'Germany',
+            'Ghana',
+            'Greece',
+            'Grenada',
+            'Guatemala',
+            'Guinea',
+            'Guinea-Bissau',
+            'Guyana',
+            'Haiti',
+            'Holy See',
+            'Honduras',
+            'Hungary',
+            'Iceland',
+            'India',
+            'Indonesia',
+            'Iran',
+            'Iraq',
+            'Ireland',
+            'Israel',
+            'Italy',
+            'Jamaica',
+            'Japan',
+            'Jordan',
+            'Kazakhstan',
+            'Kenya',
+            'Kiribati',
+            'Kuwait',
+            'Kyrgyzstan',
+            'Laos',
+            'Latvia',
+            'Lebanon',
+            'Lesotho',
+            'Liberia',
+            'Libya',
+            'Liechtenstein',
+            'Lithuania',
+            'Luxembourg',
+            'Madagascar',
+            'Malawi',
+            'Malaysia',
+            'Maldives',
+            'Mali',
+            'Malta',
+            'Marshall Islands',
+            'Mauritania',
+            'Mauritius',
+            'Mexico',
+            'Micronesia',
+            'Moldova',
+            'Monaco',
+            'Mongolia',
+            'Montenegro',
+            'Morocco',
+            'Mozambique',
+            'Myanmar (formerly Burma)',
+            'Namibia',
+            'Nauru',
+            'Nepal',
+            'Netherlands',
+            'New Zealand',
+            'Nicaragua',
+            'Niger',
+            'Nigeria',
+            'North Korea',
+            'North Macedonia',
+            'Norway',
+            'Oman',
+            'Pakistan',
+            'Palau',
+            'Palestine State',
+            'Panama',
+            'Papua New Guinea',
+            'Paraguay',
+            'Peru',
+            'Philippines',
+            'Poland',
+            'Portugal',
+            'Qatar',
+            'Romania',
+            'Russia',
+            'Rwanda',
+            'Saint Kitts and Nevis',
+            'Saint Lucia',
+            'Saint Vincent and the Grenadines',
+            'Samoa',
+            'San Marino',
+            'Sao Tome and Principe',
+            'Saudi Arabia',
+            'Senegal',
+            'Serbia',
+            'Seychelles',
+            'Sierra Leone',
+            'Singapore',
+            'Slovakia',
+            'Slovenia',
+            'Solomon Islands',
+            'Somalia',
+            'South Africa',
+            'South Korea',
+            'South Sudan',
+            'Spain',
+            'Sri Lanka',
+            'Sudan',
+            'Suriname',
+            'Sweden',
+            'Switzerland',
+            'Syria',
+            'Tajikistan',
+            'Tanzania',
+            'Thailand',
+            'Timor-Leste',
+            'Togo',
+            'Tonga',
+            'Trinidad and Tobago',
+            'Tunisia',
+            'Turkey',
+            'Turkmenistan',
+            'Tuvalu',
+            'Uganda',
+            'Ukraine',
+            'United Arab Emirates',
+            'United Kingdom',
+            'United States of America',
+            'Uruguay',
+            'Uzbekistan',
+            'Vanuatu',
+            'Venezuela',
+            'Vietnam',
+            'Yemen',
+            'Zambia',
+            'Zimbabwe'
+        ];
+
+        $registrationTypes = \App\Models\RegistrationType::where('status', 'active')->get();
+
+        // Yahan 'countries' pass karein, 'allCountries' nahi
+        return view('frontend.pages.registration-new', compact('countries', 'saarcCountries', 'registrationTypes'));
+    }
+
+    public function storeFrontendRegistration(Request $request)
+    {
+        // 1. CAPTCHA Verify
+        $captchaVerification = $this->verifyCloudflareCaptcha($request->input('cf-turnstile-response'));
+        if (!$captchaVerification['success']) {
+            return back()->withErrors(['cf-turnstile-response' => 'CAPTCHA verification failed. Please try again.'])->withInput();
+        }
+
+        // 2. Validation 
+        $validated = $request->validate([
+            'title' => 'required|in:Dr.,Prof.,Mr.,Mrs.,Ms.',
+            'firstname' => 'required|string|max:255',
+            'middlename' => 'nullable|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'date_of_birth' => 'required|date|before:today',
+            'contact_number' => 'required|string|max:20',
+            'whatsapp_number' => 'nullable|string|max:20',
+            'year_of_passing' => 'nullable|integer|min:1950|max:' . date('Y'),
+            'year_of_joining_faculty' => 'nullable|integer|min:1950|max:' . date('Y'),
+            'degree_completed' => 'required|string',
+            'department' => 'required|string',
+            'email' => 'required|email|unique:alumni_registrations,email',
+            'password' => 'required|min:8|confirmed',
+            'residence_country' => 'required|string',
+            'registration_type_id' => 'required|exists:registration_types,id',
+            'amount_paid' => 'required|numeric|min:0',
+            'documentary_proof' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'donation_amount' => 'nullable|numeric|min:0',
+            'agreed_to_rules' => 'accepted',
+            'cf-turnstile-response' => 'required',
+        ]);
+
+        // 3. File Upload
+        $documentPath = null;
+        if ($request->hasFile('documentary_proof')) {
+            $file = $request->file('documentary_proof');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/alumni-documents', $fileName);
+            $documentPath = 'alumni-documents/' . $fileName;
+        }
+
+        $photoPath = null;
+        if ($request->hasFile('profile_photo')) {
+            $file = $request->file('profile_photo');
+            $fileName = time() . '_profile_' . $file->getClientOriginalName();
+            $file->storeAs('public/alumni-photos', $fileName);
+            $photoPath = 'alumni-photos/' . $fileName;
+        }
+
+        // 4. Fetch Amount from Registration Type
+        $regType = \App\Models\RegistrationType::findOrFail($request->registration_type_id);
+
+        // 5. Create Record
+        $registration = \App\Models\AlumniRegistration::create([
+            'title' => $request->title,
+            'firstname' => $request->firstname,
+            'middlename' => $request->middlename,
+            'lastname' => $request->lastname,
+            'date_of_birth' => $request->date_of_birth,
+            'contact_number' => $request->contact_number,
+            'whatsapp_number' => $request->whatsapp_number,
+            'year_of_passing' => $request->year_of_passing,
+            'year_of_joining_faculty' => $request->year_of_joining_faculty,
+            'degree_completed' => $request->degree_completed,
+            'department' => $request->department,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'residence_country' => $request->residence_country,
+            'registration_type_id' => $request->registration_type_id,
+            'amount_paid' => $regType->amount,
+            'documentary_proof' => $documentPath,
+            'profile_photo' => $photoPath,
+            'donation_amount' => $request->donation_amount ?? 0,
+            'agreed_to_rules' => true,
+            'status' => 'payment_pending',
+            'payment_transaction_date' => null,
+            'payment_transaction_id' => null,
+        ]);
+
+        // ✅ CHANGE 1: Default 'web' guard ki jagah 'alumni' guard use karein
+        \Illuminate\Support\Facades\Auth::guard('alumni')->login($registration);
+
+        // ✅ CHANGE 2: Route name 'alu' se 'alumni.payment' karein
+        return redirect()->route('alumni.payment')
+            ->with('success', 'Registration successful! Please complete your payment.');
+    }
+    private function verifyCloudflareCaptcha($token)
+    {
+
+        if (empty($token)) {
+            return ['success' => false, 'error' => 'CAPTCHA token is missing.'];
+        }
+
+        $secretKey = env('CLOUDFLARE_TURNSTILE_SECRET_KEY');
+
+        // Cloudflare API call
+        $response = \Illuminate\Support\Facades\Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret' => $secretKey,
+            'response' => $token,
+            'remoteip' => request()->ip(),
+        ]);
+
+        $result = $response->json();
+
+        if (empty($result['success'])) {
+            \Illuminate\Support\Facades\Log::error('Cloudflare Turnstile Verification Failed: ', $result);
+        }
+
+        return $result;
+    }
+    public function paymentPage()
+    {
+        $user = Auth::guard('alumni')->user();
+        $user->load('accompanyingPersons');
+
+        // Calculate totals
+        $registrationCharge = $user->amount_paid ?? 0;
+        $accompanyingCharge = $user->accompanyingPersons->sum('charge');
+        $totalAmount = $registrationCharge + $accompanyingCharge;
+
+        return view('frontend.pages.payment', compact('user', 'registrationCharge', 'accompanyingCharge', 'totalAmount'));
+    }
+
+    public function addAccompanyingFromPayment(Request $request)
+    {
+        $user = Auth::guard('alumni')->user();
+
+        $validated = $request->validate([
+            'belongs_to_pgi' => 'required|boolean',
+            'has_membership' => 'nullable|boolean',
+            'requires_membership' => 'nullable|boolean',
+            'member_id' => 'nullable|string|max:255',
+            'title' => 'required|string|max:10',
+            'full_name' => 'required|string|max:255',
+            'age' => 'required|integer|min:1|max:150',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
+
+        // Calculate charge
+        $rateConfig = AccompanyingPersonRate::where('status', true)->first();
+        $baseCharge = $rateConfig ? $rateConfig->base_rate : 5000;
+        $finalCharge = $baseCharge;
+
+        $isAlumni = $request->belongs_to_pgi == 1;
+        $wantsMembership = $request->requires_membership == 1;
+
+        // Apply discount logic
+        if ($isAlumni) {
+            if ($rateConfig && $rateConfig->is_discount_enabled) {
+                $discountAmount = ($baseCharge * $rateConfig->discount_percentage) / 100;
+                $finalCharge = $baseCharge - $discountAmount;
+            }
+        }
+
+        $user->accompanyingPersons()->create([
+            'name' => $request->full_name,
+            'relation' => 'Accompanying Person',
+            'is_alumni' => $isAlumni,
+            'alumni_membership_id' => $request->member_id,
+            'wants_membership' => $wantsMembership,
+            'charge' => round($finalCharge, 2),
+            'title' => $request->title,
+        ]);
+
+        return back()->with('success', 'Accompanying person added successfully!');
+    }
+
+    public function deleteAccompanyingFromPayment($id)
+    {
+        $user = Auth::guard('alumni')->user();
+        $person = $user->accompanyingPersons()->findOrFail($id);
+        $person->delete();
+
+        return back()->with('success', 'Accompanying person removed successfully!');
+    }
+    public function updatePreference(Request $request)
+{
+    $user = Auth::guard('alumni')->user();
+    
+    $validated = $request->validate([
+        'registration_type_id' => 'required|exists:registration_types,id',
+    ]);
+
+    // Naya registration type fetch karein
+    $newRegType = RegistrationType::findOrFail($validated['registration_type_id']);
+    
+    // User ka registration type update karein
+    $user->update([
+        'registration_type_id' => $validated['registration_type_id'],
+        'amount_paid' => $newRegType->amount,
+    ]);
+
+    return redirect()->route('alumni.payment')
+        ->with('success', 'Registration type updated successfully!');
 }
 }

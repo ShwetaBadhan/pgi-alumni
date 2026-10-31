@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'alumni' => [
+            'driver' => 'session',
+            'provider' => 'alumni',
+        ],
     ],
 
     /*
@@ -65,6 +69,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'alumni' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AlumniRegistration::class, // 👈 Frontend 
         ],
 
         // 'users' => [
