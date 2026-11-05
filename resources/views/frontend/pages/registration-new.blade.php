@@ -181,7 +181,7 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="rbt-modern-select bg-transparent height-45">
-                                        <select class="w-100" name="department" required>
+                                        <select class="w-100" name="department"  class="w-100 selectpicker" data-live-search="true" required>
                                             <option value="">Select department you were related to at PGIMER *
                                             </option>
                                             @foreach (['Surgical Gastroenterology', 'Medical Gastroenterology', 'Cardiology', 'Neurology', 'Orthopaedics', 'Oncology', 'Pediatrics', 'Radiology', 'General Medicine', 'Other'] as $dept)
