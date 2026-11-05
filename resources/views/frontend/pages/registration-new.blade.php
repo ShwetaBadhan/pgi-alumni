@@ -170,7 +170,7 @@
                                         <select class="w-100" name="degree_completed" required>
                                             <option value="">Select Degree *</option>
 
-                                            @foreach (['MD', 'DM', 'Junior Resident', 'Senior Resident'] as $d)
+                                            @foreach (config('alumni_options.degrees') as $d)
                                                 <option value="{{ $d }}"
                                                     {{ old('degree_completed') == $d ? 'selected' : '' }}>
                                                     {{ $d }}
@@ -181,15 +181,16 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="rbt-modern-select bg-transparent height-45">
-                                        <select class="w-100" name="department"  class="w-100 selectpicker" data-live-search="true" required>
-                                            <option value="">Select department you were related to at PGIMER *
-                                            </option>
-                                            @foreach (['Surgical Gastroenterology', 'Medical Gastroenterology', 'Cardiology', 'Neurology', 'Orthopaedics', 'Oncology', 'Pediatrics', 'Radiology', 'General Medicine', 'Other'] as $dept)
-                                                <option value="{{ $dept }}"
-                                                    {{ old('department') == $dept ? 'selected' : '' }}>{{ $dept }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                       <select class="w-100 selectpicker" name="department" data-live-search="true" required>
+    <option value="">Select department you were related to at PGIMER *</option>
+    
+    @foreach (config('alumni_options.departments') as $dept)
+        <option value="{{ $dept }}" {{ old('department') == $dept ? 'selected' : '' }}>
+            {{ $dept }}
+        </option>
+    @endforeach
+    
+</select>
                                     </div>
                                 </div>
                             </div>
@@ -212,7 +213,7 @@
                                         <select class="w-100 selectpicker" data-live-search="true"
                                             title="Select Country *" name="residence_country" id="residence_country"
                                             required>
-                                            @foreach ($countries as $country)
+                                            @foreach (config('alumni_options.all_countries') as $country)
                                                 <option value="{{ $country }}"
                                                     data-is-saarc="{{ in_array($country, $saarcCountries) ? '1' : '0' }}"
                                                     {{ old('residence_country') == $country ? 'selected' : '' }}>
