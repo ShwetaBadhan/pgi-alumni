@@ -20,6 +20,8 @@ class AccompanyingPerson extends Model
         'alumni_membership_id',
         'wants_membership',
         'charge',
+        'gender',
+        'age',
     ];
 
     protected $casts = [

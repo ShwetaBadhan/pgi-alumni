@@ -43,6 +43,7 @@
                             </div>
                         @endif
 
+
                         <form id="alumni-registration-form" method="POST" action="{{ route('alumni.register.store') }}"
                             class="alumni-registration-form" enctype="multipart/form-data">
                             @csrf
@@ -50,6 +51,16 @@
                             <!-- Form Title -->
                             <div class="form-group">
                                 <h4 class="title">Alumni Registration Form</h4>
+                            </div>
+
+                            <!-- Special Banner for MD/DM -->
+                            <div class="alert alert-info mt--20 mb-4 border-info">
+                                <h5 class="alert-heading"><i class="feather icon-info"></i> Special Invitation for MD & DM
+                                    Alumni!</h5>
+                                <p class="mb-0">Currently, we are accepting registrations only for <strong>MD and
+                                        DM</strong> degree holders.
+                                    As a special benefit, your <strong>Alumni Meet (Summit) is absolutely FREE</strong> with
+                                    your Membership!</p>
                             </div>
 
                             <!-- Title -->
@@ -100,7 +111,7 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <div class="input-group">
-                                            
+
                                             <input type="tel" name="contact_number" id="contact_number"
                                                 value="{{ old('contact_number') }}" class="form-control" required>
                                         </div>
@@ -120,11 +131,12 @@
                                             </label>
                                         </div>
                                         <div class="input-group">
-                                           
+
                                             <input type="tel" name="whatsapp_number" id="whatsapp_number"
-                                                value="{{ old('whatsapp_number') }}" class="form-control" placeholder="WhatsApp Enabled Contact Number">
+                                                value="{{ old('whatsapp_number') }}" class="form-control"
+                                                placeholder="WhatsApp Enabled Contact Number">
                                         </div>
-                                       
+
                                         <span class="focus-border"></span>
                                     </div>
                                 </div>
@@ -156,11 +168,13 @@
                                 <div class="col-lg-6">
                                     <div class="rbt-modern-select bg-transparent height-45">
                                         <select class="w-100" name="degree_completed" required>
-                                            <option value="">Select any degree completed from PGIMER *</option>
-                                            @foreach (['MBBS', 'MD', 'MS', 'DM', 'MCh', 'PhD', 'Diploma', 'BSc', 'MSc', 'Fellowship'] as $d)
+                                            <option value="">Select Degree *</option>
+
+                                            @foreach (['MD', 'DM', 'Junior Resident', 'Senior Resident'] as $d)
                                                 <option value="{{ $d }}"
                                                     {{ old('degree_completed') == $d ? 'selected' : '' }}>
-                                                    {{ $d }}</option>
+                                                    {{ $d }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -180,51 +194,57 @@
                                 </div>
                             </div>
 
-                           <!-- Email & Country -->
-<div class="row">
-    <div class="col-lg-6 mt--20">
-        <div class="form-group">
-            <input type="email" name="email" value="{{ old('email') }}" required>
-            <label>Email ID *</label>
-            <span class="focus-border"></span>
-            <small class="text-muted">Please remember this email and <a href="#">Click here to login</a>.</small>
-        </div>
-    </div>
-    <div class="col-lg-6 mt--20">
-        <label class="mb-1 d-block fw-bold">Residence Country *</label>
-        <div class="rbt-modern-select bg-transparent height-45 w-100">
-            <!-- 'selectpicker' class aur 'data-live-search' bootstrap-select ke liye zaroori hain -->
-            <select class="w-100 selectpicker" data-live-search="true" title="Select Country *" name="residence_country" id="residence_country" required>
-                @foreach ($countries as $country)
-                    <option value="{{ $country }}" data-is-saarc="{{ in_array($country, $saarcCountries) ? '1' : '0' }}" {{ old('residence_country') == $country ? 'selected' : '' }}>
-                        {{ $country }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-check mt-2">
-            <input class="form-check-input" type="checkbox" id="saarcFilter" onchange="toggleSaarcCountries()">
-            <label class="form-check-label small" for="saarcFilter">Show SAARC Countries Only</label>
-        </div>
-    </div>
-</div>
+                            <!-- Email & Country -->
+                            <div class="row">
+                                <div class="col-lg-6 mt--20">
+                                    <div class="form-group">
+                                        <input type="email" name="email" value="{{ old('email') }}" required>
+                                        <label>Email ID *</label>
+                                        <span class="focus-border"></span>
+                                        <small class="text-muted">Please remember this email and <a href="#">Click
+                                                here to login</a>.</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mt--20">
+                                    <label class="mb-1 d-block fw-bold">Residence Country *</label>
+                                    <div class="rbt-modern-select bg-transparent height-45 w-100">
+                                        <!-- 'selectpicker' class aur 'data-live-search' bootstrap-select ke liye zaroori hain -->
+                                        <select class="w-100 selectpicker" data-live-search="true"
+                                            title="Select Country *" name="residence_country" id="residence_country"
+                                            required>
+                                            @foreach ($countries as $country)
+                                                <option value="{{ $country }}"
+                                                    data-is-saarc="{{ in_array($country, $saarcCountries) ? '1' : '0' }}"
+                                                    {{ old('residence_country') == $country ? 'selected' : '' }}>
+                                                    {{ $country }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="saarcFilter"
+                                            onchange="toggleSaarcCountries()">
+                                        <label class="form-check-label small" for="saarcFilter">Show SAARC Countries
+                                            Only</label>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Password -->
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="password" name="password" minlength="12" required>
+                                        <input type="password" name="password" required>
                                         <label>Create Password *</label>
                                         <span class="focus-border"></span>
-                                        <small class="text-muted">Use a strong password: at least 12 characters with
+                                        <small class="text-muted">Use a strong password:
                                             uppercase, lowercase, numbers, and symbols. Avoid common words or patterns.
-                                            <span class="text-danger">Password must be at least 12
-                                                characters</span></small>
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <input type="password" name="password_confirmation" minlength="12" required>
+                                        <input type="password" name="password_confirmation" required>
                                         <label>Confirm Password *</label>
                                         <span class="focus-border"></span>
                                     </div>
@@ -288,13 +308,13 @@
                             </div>
 
                             <!-- Documentary Proof -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label class="static-label">Upload documentary proof for your association as alumnus with
                                     PGI</label>
-                                <input type="file" name="documentary_proof" accept=".pdf,.jpg,.jpeg,.png" required
+                                <input type="file" name="documentary_proof" accept=".pdf,.jpg,.jpeg,.png"
                                     class="form-control">
                                 <small class="text-muted">Accepted formats: PDF, JPG, PNG (Max 2MB)</small>
-                            </div>
+                            </div> --}}
 
                             <!-- Donation/Contribution -->
                             <div class=" mt--20">
@@ -320,20 +340,23 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-4 mt--20">
 
-                            <div class="cf-turnstile" data-sitekey="{{ env('CLOUDFLARE_TURNSTILE_SITE_KEY') }}"></div>
-                            @error('cf-turnstile-response')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                <div class="cf-turnstile" data-sitekey="{{ env('CLOUDFLARE_TURNSTILE_SITE_KEY') }}">
+                                </div>
+                                @error('cf-turnstile-response')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
 
                             <!-- Agreement -->
                             <div class="form-group mt--20">
                                 <p class="rbt-checkbox-wrapper mb--5">
-                                        <input id="rbt-checkbox-1" name="agreed_to_rules" value="1" required type="checkbox" {{ old('agreed_to_rules') ? 'checked' : '' }}>
-                                        <label for="rbt-checkbox-1">I agree that all the above information is correct to the best of my knowledge</label>
-                                    </p>
+                                    <input id="rbt-checkbox-1" name="agreed_to_rules" value="1" required
+                                        type="checkbox" {{ old('agreed_to_rules') ? 'checked' : '' }}>
+                                    <label for="rbt-checkbox-1">I agree that all the above information is correct to the
+                                        best of my knowledge</label>
+                                </p>
                                 {{-- <label class="checkbox-label">
                                     <input type="checkbox" name="agreed_to_rules" value="1" required
                                          >
@@ -365,7 +388,8 @@
                                 <p>PGI OFFERS DISCOUNTED OR FREE TREATMENT TO FINANCIALLY CHALLENGED PATIENTS THROUGH THE
                                     "POOR PATIENTS FUND" THAT IS FUNDED BY DONORS LIKE YOU.</p>
                                 <p>ANY AMOUNT WOULD CONTRIBUTE TO A LIFE SAVING MEANS FOR THESE DESTITUTE PATIENTS.</p>
-                                <p><a href="https://pgimer.edu.in/PGIMER_PORTAL/PGIMERPORTAL/GlobalPages/JSP/Page_Data.jsp?dep_id=5676" target="_blank" class="text-primary">PLEASE CLICK HERE TO DONATE.</a></p>
+                                <p><a href="https://pgimer.edu.in/PGIMER_PORTAL/PGIMERPORTAL/GlobalPages/JSP/Page_Data.jsp?dep_id=5676"
+                                        target="_blank" class="text-primary">PLEASE CLICK HERE TO DONATE.</a></p>
                             </div>
                         </form>
                     </div>
@@ -408,136 +432,137 @@
 
 @push('scripts')
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<!-- Agar aapke master layout me bootstrap-select ka JS/CSS nahi hai, toh ye 2 lines add kar dein -->
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css"> -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script> -->
 
-<script>
-// 1. Scrolling / Modal Backdrop Stuck Fix (Sabse pehle run karein)
-function fixScrolling() {
-    document.body.classList.remove('modal-open');
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-    const backdrops = document.querySelectorAll('.modal-backdrop');
-    backdrops.forEach(b => b.remove());
-}
-
-// 2. WhatsApp checkbox functionality
-function toggleWhatsApp() {
-    const checkbox = document.getElementById('sameWhatsApp');
-    const contactNumber = document.getElementById('contact_number');
-    const whatsappNumber = document.getElementById('whatsapp_number');
-    
-    if (checkbox && contactNumber && whatsappNumber) {
-        if (checkbox.checked) {
-            whatsappNumber.value = contactNumber.value;
-            whatsappNumber.readOnly = true;
-            whatsappNumber.style.backgroundColor = '#e9ecef';
-        } else {
-            whatsappNumber.value = '';
-            whatsappNumber.readOnly = false;
-            whatsappNumber.style.backgroundColor = '';
+    <script>
+        // 1. Scrolling / Modal Backdrop Stuck Fix 
+        function fixScrolling() {
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(b => b.remove());
         }
-    }
-}
 
-// 3. SAARC Filter (Bootstrap Select Compatible)
-function toggleSaarcCountries() {
-    const checkbox = document.getElementById('saarcFilter');
-    const select = document.getElementById('residence_country');
-    if (!select) return;
+        // 2. WhatsApp checkbox functionality
+        function toggleWhatsApp() {
+            const checkbox = document.getElementById('sameWhatsApp');
+            const contactNumber = document.getElementById('contact_number');
+            const whatsappNumber = document.getElementById('whatsapp_number');
 
-    const isSaarcFilter = checkbox.checked;
-    const options = select.querySelectorAll('option');
-
-    // Original options ko hide/disable karein
-    options.forEach(option => {
-        if (option.value === '') return;
-        const isSaarc = option.getAttribute('data-is-saarc') === '1';
-
-        if (isSaarcFilter && !isSaarc) {
-            option.style.display = 'none';
-            option.disabled = true;
-        } else {
-            option.style.display = '';
-            option.disabled = false;
+            if (checkbox && contactNumber && whatsappNumber) {
+                if (checkbox.checked) {
+                    whatsappNumber.value = contactNumber.value;
+                    whatsappNumber.readOnly = true;
+                    whatsappNumber.style.backgroundColor = '#e9ecef';
+                } else {
+                    whatsappNumber.value = '';
+                    whatsappNumber.readOnly = false;
+                    whatsappNumber.style.backgroundColor = '';
+                }
+            }
         }
-    });
 
-    // Agar Bootstrap Select active hai, toh usko refresh karein
-    if (typeof $ !== 'undefined' && $(select).hasClass('selectpicker')) {
-        $(select).selectpicker('refresh');
-        
-        // Bootstrap Select ke generated dropdown items ko bhi manually hide karein
-        setTimeout(() => {
-            const dropdownItems = select.parentElement.querySelectorAll('.dropdown-menu .dropdown-item');
-            dropdownItems.forEach(item => {
-                const index = item.getAttribute('data-original-index');
-                if (index !== null) {
-                    const opt = select.options[index];
-                    if (opt && opt.disabled) {
-                        item.style.display = 'none';
-                    } else {
-                        item.style.display = '';
-                    }
+        // 3. SAARC Filter (Bootstrap Select Compatible)
+        function toggleSaarcCountries() {
+            const checkbox = document.getElementById('saarcFilter');
+            const select = document.getElementById('residence_country');
+            if (!select) return;
+
+            const isSaarcFilter = checkbox.checked;
+            const options = select.querySelectorAll('option');
+
+
+            options.forEach(option => {
+                if (option.value === '') return;
+                const isSaarc = option.getAttribute('data-is-saarc') === '1';
+
+                if (isSaarcFilter && !isSaarc) {
+                    option.style.display = 'none';
+                    option.disabled = true;
+                } else {
+                    option.style.display = '';
+                    option.disabled = false;
                 }
             });
-        }, 50);
-    }
-}
 
-// 4. Registration Type Amount Update
-document.addEventListener('DOMContentLoaded', function() {
-    // Scrolling fix on page load
-    fixScrolling();
 
-    // WhatsApp sync
-    const contactInput = document.getElementById('contact_number');
-    if (contactInput) {
-        contactInput.addEventListener('input', function() {
-            const checkbox = document.getElementById('sameWhatsApp');
-            if (checkbox && checkbox.checked) {
-                const whatsappInput = document.getElementById('whatsapp_number');
-                if (whatsappInput) whatsappInput.value = this.value;
+            if (typeof $ !== 'undefined' && $(select).hasClass('selectpicker')) {
+                $(select).selectpicker('refresh');
+
+
+                setTimeout(() => {
+                    const dropdownItems = select.parentElement.querySelectorAll('.dropdown-menu .dropdown-item');
+                    dropdownItems.forEach(item => {
+                        const index = item.getAttribute('data-original-index');
+                        if (index !== null) {
+                            const opt = select.options[index];
+                            if (opt && opt.disabled) {
+                                item.style.display = 'none';
+                            } else {
+                                item.style.display = '';
+                            }
+                        }
+                    });
+                }, 50);
             }
-        });
-    }
+        }
 
-    // Registration type dropdown logic
-    const registrationSelect = document.getElementById('registration_type_id');
-    if (registrationSelect) {
-        registrationSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const selectedAmount = selectedOption ? parseFloat(selectedOption.dataset.amount) : NaN;
-            const parsedAmount = Number.isFinite(selectedAmount) ? selectedAmount : 0;
-            
-            document.getElementById('amount_paid').value = this.value ? parsedAmount : '';
-            document.getElementById('chargeDisplay').textContent = 'INR ' + parsedAmount.toLocaleString('en-IN');
-            document.getElementById('chargeBox').style.display = this.value ? 'block' : 'none';
-
-            const eligibilityLink = document.getElementById('eligibilityLink');
-            if (eligibilityLink) {
-                eligibilityLink.style.display = selectedOption.textContent.includes('Global PGI Alumni Summit') ? 'inline-block' : 'none';
-            }
-        });
-        
-        // Trigger on load if pre-selected
-        registrationSelect.dispatchEvent(new Event('change'));
-    }
-});
-
-// 5. Eligibility Modal with Scroll Fix
-function openEligibilityModal() {
-    const modalEl = document.getElementById('eligibilityModal');
-    if (modalEl) {
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-        
-        // Jab modal band ho, scrolling fix zaroor call karein
-        modalEl.addEventListener('hidden.bs.modal', function () {
+        // 4. Registration Type Amount Update
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scrolling fix on page load
             fixScrolling();
-        }, { once: true });
-    }
-}
-</script>
+
+            // WhatsApp sync
+            const contactInput = document.getElementById('contact_number');
+            if (contactInput) {
+                contactInput.addEventListener('input', function() {
+                    const checkbox = document.getElementById('sameWhatsApp');
+                    if (checkbox && checkbox.checked) {
+                        const whatsappInput = document.getElementById('whatsapp_number');
+                        if (whatsappInput) whatsappInput.value = this.value;
+                    }
+                });
+            }
+
+            // Registration type dropdown logic
+            const registrationSelect = document.getElementById('registration_type_id');
+            if (registrationSelect) {
+                registrationSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const selectedAmount = selectedOption ? parseFloat(selectedOption.dataset.amount) : NaN;
+                    const parsedAmount = Number.isFinite(selectedAmount) ? selectedAmount : 0;
+
+                    document.getElementById('amount_paid').value = this.value ? parsedAmount : '';
+                    document.getElementById('chargeDisplay').textContent = 'INR ' + parsedAmount
+                        .toLocaleString('en-IN');
+                    document.getElementById('chargeBox').style.display = this.value ? 'block' : 'none';
+
+                    const eligibilityLink = document.getElementById('eligibilityLink');
+                    if (eligibilityLink) {
+                        eligibilityLink.style.display = selectedOption.textContent.includes(
+                            'Global PGI Alumni Summit') ? 'inline-block' : 'none';
+                    }
+                });
+
+                // Trigger on load if pre-selected
+                registrationSelect.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // 5. Eligibility Modal with Scroll Fix
+        function openEligibilityModal() {
+            const modalEl = document.getElementById('eligibilityModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+
+
+                modalEl.addEventListener('hidden.bs.modal', function() {
+                    fixScrolling();
+                }, {
+                    once: true
+                });
+            }
+        }
+    </script>
 @endpush

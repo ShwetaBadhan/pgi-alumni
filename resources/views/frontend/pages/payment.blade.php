@@ -67,19 +67,18 @@
                                             <div class="d-flex justify-content-end gap-2">
                                                 <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal"
                                                     data-bs-target="#addAccompanyingModal">
-                                                    <i class="feather icon-plus"></i> Add Accompanying Person
+                                                    <i class="feather icon-plus"></i> Add
                                                 </button>
                                                 @if ($user->accompanyingPersons->isNotEmpty())
                                                     <button class="btn btn-sm btn-primary" id="viewListBtn"
                                                         onclick="toggleAccompanyingList()">
-                                                        <i class="feather icon-list"></i> View List
+                                                        <i class="feather icon-list"></i> View
                                                     </button>
                                                 @endif
                                             </div>
                                         </td>
                                     </tr>
 
-                                    <!-- Accompanying Persons Total -->
                                     @if ($user->accompanyingPersons->isNotEmpty())
                                         <tr class="border-top">
                                             <td class="fw-bold text-end" colspan="2">
@@ -87,6 +86,84 @@
                                             </td>
                                         </tr>
                                     @endif
+
+                                    @if ($user->accompanyingPersons->isNotEmpty())
+                                        <tr>
+                                            <td colspan="2" class="p-0">
+                                                <div id="accompanyingListSection" class="p-3 bg-light border-top"
+                                                    style="display: none;">
+                                                    <h6 class="fw-bold mb-3">Accompanying Persons List</h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered table-hover mb-0 bg-white">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Sr. No.</th>
+                                                                    <th>Name</th>
+                                                                    <th>Age</th>
+                                                                    <th>Belong to PGI</th>
+                                                                    <th>Member</th>
+                                                                    <th>Need Membership</th>
+                                                                    <th>Gender</th>
+                                                                    <th>Amount</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($user->accompanyingPersons as $index => $person)
+                                                                    <tr>
+                                                                        <td>{{ $index + 1 }}</td>
+                                                                        <td>{{ $person->title }} {{ $person->name }}</td>
+                                                                        <td>{{ $person->age ?? 'N/A' }}</td>
+                                                                        <td>
+                                                                            @if ($person->is_alumni)
+                                                                                <span class="badge bg-success">Yes</span>
+                                                                            @else
+                                                                                <span class="badge bg-secondary">No</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>
+                                                                            @if ($person->alumni_membership_id)
+                                                                                <span class="badge bg-info">Yes</span>
+                                                                            @else
+                                                                                <span class="badge bg-secondary">No</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>
+                                                                            @if ($person->wants_membership)
+                                                                                <span
+                                                                                    class="badge bg-warning text-dark">Yes</span>
+                                                                            @else
+                                                                                <span class="badge bg-secondary">No</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>{{ $person->gender ?? 'N/A' }}</td>
+                                                                        <td class="fw-bold text-success">INR
+                                                                            {{ number_format($person->charge, 2) }}</td>
+                                                                        <td>
+                                                                            <form
+                                                                                action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
+                                                                                method="POST"
+                                                                                onsubmit="return confirm('Are you sure you want to remove this person?');">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit"
+                                                                                    class="btn btn-sm btn-danger">
+                                                                                    <i class="feather icon-trash-2"></i>
+                                                                                    Remove
+                                                                                </button>
+                                                                            </form>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                    <!-- ✅ Missing Block End -->
+
 
                                     <tr class="border-top">
                                         <td class="fw-bold">Total:</td>
@@ -102,91 +179,125 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Accompanying Persons List (Initially Hidden) -->
-                        @if ($user->accompanyingPersons->isNotEmpty())
-                            <div id="accompanyingListSection" class="card-body border-top" style="display: none;">
-                                <h6 class="fw-bold mb-3">Accompanying Persons List</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Sr. No.</th>
-                                                <th>Name</th>
-                                                <th>Age</th>
-                                                <th>Belong to PGI</th>
-                                                <th>Member</th>
-                                                <th>Need Membership</th>
-                                                <th>Gender</th>
-                                                <th>Amount</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($user->accompanyingPersons as $index => $person)
-                                                <tr>
-                                                    <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $person->title }} {{ $person->name }}</td>
-                                                    <td>{{ $person->age ?? 'N/A' }}</td>
-                                                    <td>
-                                                        @if ($person->is_alumni)
-                                                            <span class="badge bg-success">Yes</span>
-                                                        @else
-                                                            <span class="badge bg-secondary">No</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if ($person->alumni_membership_id)
-                                                            <span class="badge bg-info">Yes</span>
-                                                        @else
-                                                            <span class="badge bg-secondary">No</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if ($person->wants_membership)
-                                                            <span class="badge bg-warning text-dark">Yes</span>
-                                                        @else
-                                                            <span class="badge bg-secondary">No</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $person->gender ?? 'N/A' }}</td>
-                                                    <td class="fw-bold text-success">INR
-                                                        {{ number_format($person->charge, 2) }}</td>
-                                                    <td>
-                                                        <form
-                                                            action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to remove this person?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="feather icon-trash-2"></i> Remove
-                                                            </button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endif
-
                         <div class="card-footer text-center">
-                            <button class="btn btn-outline-primary mb-2" data-bs-toggle="modal"
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#editPreferenceModal">
                                 <i class="feather icon-edit"></i> Edit Preference
-                            </button>
-                            <br>
-                            <button class="btn btn-warning mt-2">
-                                <i class="feather icon-credit-card"></i> Click to Pay Now
                             </button>
                         </div>
                     </div>
 
+                    @if ($balanceDue > 0)
+                        <div class="card shadow-sm mb-4 border-primary">
+                            <div class="card-header bg-primary text-white text-center">
+                                <h5 class="mb-0"><i class="feather icon-credit-card"></i> Scan to Pay Remaining Balance
+                                    via UPI</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                @php
+                                
+                                    $upiId = env('UPI_ID', 'default_upi@okicici');
+                                    $merchantName = env('UPI_MERCHANT_NAME', 'PGI Alumni Society');
+
+                                    $cleanAmount = number_format($balanceDue, 2, '.', '');
+                                    $note = 'Payment - ' . ($user->membership_id ?? 'New');
+
+                                    $upiString =
+                                        "upi://pay?pa={$upiId}&pn=" .
+                                        urlencode($merchantName) .
+                                        "&am={$cleanAmount}&cu=INR&tn=" .
+                                        urlencode($note);
+                                @endphp
+
+                                <div class="d-inline-block p-3 bg-white border rounded">
+                                    {!! QrCode::size(250)->generate($upiString) !!}
+                                </div>
+
+                                <div class="alert alert-light border mt-2 text-start small">
+                                    <strong>Payment Breakup:</strong><br>
+                                    @if ($pendingAccCharge > 0)
+                                        • New Accompanying Person(s) Charge: INR
+                                        {{ number_format($pendingAccCharge, 2) }}<br>
+                                    @endif
+                                    @if ($pendingDonation > 0)
+                                        • New Donation Amount: INR {{ number_format($pendingDonation, 2) }}<br>
+                                    @endif
+                                    <hr class="my-1">
+                                    • <strong>Total New Payment (QR Code): INR {{ number_format($balanceDue, 2) }}</strong>
+                                    <br><br>
+                                    <span class="text-muted">
+                                        (Note: Your total historical paid amount is INR
+                                        {{ number_format($totalPaidEver, 2) }}. This QR is only for the newly added items.)
+                                    </span>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <h6 class="fw-bold text-start mb-3">Step 2: Confirm Your Payment</h6>
+                                <form action="{{ route('alumni.payment.submit-utr') }}" method="POST"
+                                    enctype="multipart/form-data" class="text-start">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">UPI Transaction ID (UTR) *</label>
+                                        <input type="text" name="payment_transaction_id" class="form-control"
+                                            placeholder="e.g., 324567890123" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Upload Payment Screenshot *</label>
+                                        <input type="file" name="payment_screenshot" class="form-control"
+                                            accept="image/*,.pdf" required>
+                                    </div>
+
+                                    <div class="alert alert-danger border-danger mb-3">
+                                        <i class="feather icon-alert-triangle me-2"></i>
+                                        <strong>Warning:</strong> Providing a fake UTR will result in rejection.
+                                    </div>
+
+                                    <div class="mb-4 form-check p-3 bg-light rounded border">
+                                        <input type="checkbox" class="form-check-input" id="confirmPayment"
+                                            name="confirm_payment" required>
+                                        <label class="form-check-label fw-bold small" for="confirmPayment">
+                                            I confirm that I have transferred <strong>INR
+                                                {{ number_format($balanceDue, 2) }}</strong> via UPI.
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success w-100 btn-lg mt-2">
+                                        <i class="feather icon-check-circle"></i> Submit Payment Details
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <div class="card shadow-sm mb-4 border-success">
+                            <div class="card-header bg-success text-white text-center">
+                                <h5 class="mb-0"><i class="feather icon-check-circle"></i> Payment Completed!</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="alert alert-success mb-0">
+                                    <h5 class="alert-heading">Thank You!</h5>
+                                    <p>Your total payment of <strong>INR {{ number_format($totalAmount, 2) }}</strong> has
+                                        been successfully submitted.</p>
+                                    <hr>
+                                    <p class="mb-0 text-start">
+                                        <strong>Current Status:</strong> <span
+                                            class="badge bg-warning text-dark">{{ ucfirst($user->status) }}</span>
+                                    </p>
+                                    <p class="mt-3 text-muted small">
+                                        Our admin team is verifying your payments. You will receive a confirmation email
+                                        once approved.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
 
     <!-- Add Accompanying Person Modal -->
@@ -375,11 +486,11 @@
                                         {{ $user->registration_type_id == $regType->id ? 'checked' : '' }}>
                                     <label class="form-check-label" for="regType{{ $regType->id }}">
                                         {{ $regType->name }}
-                                        
+
                                     </label>
                                 </div>
                             @endforeach
-                            
+
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -32,15 +32,16 @@
 
                         <div class="header-info">
                             <div class="header-right-btn d-flex">
-                               <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="{{ route('alumni.abstract.create') }}">
-    <span data-text="Submit Abstract">Submit Abstract</span>
-</a>
+                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs"
+                                    href="{{ route('alumni.abstract.create') }}">
+                                    <span data-text="Submit Abstract">Submit Abstract</span>
+                                </a>
                             </div>
                         </div>
                         <div class="rbt-separator"></div>
                         <div class="header-info">
                             <div class="header-right-btn d-flex">
-                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="#">
+                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="{{ route('alumni-login') }}">
                                     <span data-text="Login">Login</span>
                                 </a>
                             </div>
@@ -48,8 +49,10 @@
                         <div class="rbt-separator"></div>
                         <div class="header-info">
                             <div class="header-right-btn d-flex">
-                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs" href="{{ route('alumni-registration') }}">
-                                    <span data-text="Register for Global Alumni Summit 2026">Register for Global Alumni Summit 2026</span>
+                                <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs"
+                                    href="{{ route('alumni-registration') }}">
+                                    <span data-text="Register for Global Alumni Summit 2026">Register for Global Alumni
+                                        Summit 2026</span>
                                 </a>
                             </div>
                         </div>
@@ -101,16 +104,20 @@
                                     </li>
                                     <li class="has-dropdown"><a href="{{ route('membership') }}">Membership</a>
                                     </li>
-                                    <li class="has-dropdown"><a href="{{ route('overseas-founding-members') }}">Overseas Founding Members</a>
+                                    <li class="has-dropdown"><a href="{{ route('overseas-founding-members') }}">Overseas
+                                            Founding Members</a>
                                     </li>
-                                    <li class="has-dropdown"><a href="{{ route('national-founding-members') }}">National Founding Members</a>
+                                    <li class="has-dropdown"><a
+                                            href="{{ route('national-founding-members') }}">National Founding
+                                            Members</a>
                                     </li>
-                                    <li class="has-dropdown"><a href="{{ route('alumni-publications') }}">Alumni Publications</a>
+                                    <li class="has-dropdown"><a href="{{ route('alumni-publications') }}">Alumni
+                                            Publications</a>
                                     </li>
                                 </ul>
                             </li>
 
- <li class="has-menu-child-item position-static">
+                            <li class="has-menu-child-item position-static">
                                 <a href="{{ route('executive-committee') }}">Committee</a>
 
                             </li>
@@ -210,19 +217,27 @@
                                     <i class="feather-chevron-down"></i>
                                 </a>
                                 <ul class="submenu">
-                                    <li class="has-dropdown"><a href="{{ route('international-awards') }}">International Awards</a>
+                                    <li class="has-dropdown"><a
+                                            href="{{ route('international-awards') }}">International Awards</a>
 
                                     </li>
-                                    <li class="has-dropdown"><a href="{{ route('national-awards') }}">National Awards</a>
+                                    <li class="has-dropdown"><a href="{{ route('national-awards') }}">National
+                                            Awards</a>
 
                                     </li>
-                                    <li class="has-dropdown"><a href="https://indiawest.com/scientists-awarded-for-cancer-research/" target="_blank">Scientists Awarded for Cancer
+                                    <li class="has-dropdown"><a
+                                            href="https://indiawest.com/scientists-awarded-for-cancer-research/"
+                                            target="_blank">Scientists Awarded for Cancer
                                             Research</a>
                                     </li>
-                                    <li class="has-dropdown"><a href="https://www.indiapost.com/indian-american-scientists-awarded-for-cancer-research-discoveries-by-saascr/" target="_blank">Indian American Scientists Awarded for
+                                    <li class="has-dropdown"><a
+                                            href="https://www.indiapost.com/indian-american-scientists-awarded-for-cancer-research-discoveries-by-saascr/"
+                                            target="_blank">Indian American Scientists Awarded for
                                             Cancer Research Discoveries by SAASCR</a>
                                     </li>
-                                    <li class="has-dropdown"><a href="https://indiapost.com/indian-american-cancer-scientists-honored-with-prestigious-awards-for-groundbreaking-discoveries/#google_vignette" target="_blank">Indian American Cancer Scientists
+                                    <li class="has-dropdown"><a
+                                            href="https://indiapost.com/indian-american-cancer-scientists-honored-with-prestigious-awards-for-groundbreaking-discoveries/#google_vignette"
+                                            target="_blank">Indian American Cancer Scientists
                                             Honored for Groundbreaking Discoveries</a>
                                     </li>
 
@@ -254,7 +269,7 @@
                 </div>
             </div>
         </div>
-       
+
     </div>
 
 </header>
@@ -283,9 +298,8 @@
 
             <ul class="navbar-top-left rbt-information-list justify-content-start">
                 <li>
-                    <a href=""><i
-                            class="feather-mail"></i><span class="__cf_email__"
-                            >pcaasixc@gmail.com</span></a>
+                    <a href=""><i class="feather-mail"></i><span
+                            class="__cf_email__">pcaasixc@gmail.com</span></a>
                 </li>
                 <li>
                     <a href="#"><i class="feather-phone"></i>0172-2756481, 2756483</a>
@@ -444,7 +458,7 @@
             </ul>
         </nav>
 
-      
+
 
     </div>
 </div>

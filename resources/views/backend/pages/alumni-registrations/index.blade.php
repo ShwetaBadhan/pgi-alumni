@@ -143,7 +143,9 @@
                                                         <i class="ti ti-user fs-20"></i>
                                                     </div>
                                                     <div>
+                                                        <a href="{{ route('alumni-registrations.show', $reg->id) }}">
                                                         <p class="fw-medium text-dark mb-0">{{ $reg->full_name }}</p>
+                                                        </a>
                                                         <small class="text-muted">{{ $reg->contact_number }}</small>
                                                     </div>
                                                 </div>

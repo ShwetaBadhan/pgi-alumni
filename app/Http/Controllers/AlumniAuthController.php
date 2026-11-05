@@ -33,7 +33,7 @@ class AlumniAuthController extends Controller
             return back()->withErrors(['password' => 'Invalid password.'])->onlyInput('email');
         }
 
-        // ✅ EXPLICITLY 'alumni' GUARD USE KAREIN
+        // ✅ EXPLICITLY 'alumni' 
         Auth::guard('alumni')->login($user);
         $request->session()->regenerate();
 
@@ -41,22 +41,31 @@ class AlumniAuthController extends Controller
     }
 
 
-    public function profile()
+     public function profile()
     {
         $user = Auth::guard('alumni')->user();
+        
         if (!$user) {
             return redirect()->route('alumni-login')->with('error', 'Please login first.');
         }
 
-
         $accompanyingRate = AccompanyingPersonRate::where('status', true)->first();
-        $user->load('accompanyingPersons');
+        
+        // ✅ It is necessary to load all relationships here.
+        $user->load([
+            'profile', 
+            'documents', 
+            'payments', 
+            'registrationType', 
+            'accompanyingPersons'
+        ]);
 
+      // ✅ Ensure that the view name is correct (it is 'alumni-profile' according to your code)
         return view('frontend.pages.alumni-profile', compact('user', 'accompanyingRate'));
     }
     public function logout()
     {
-        // ✅ 'alumni' guard se logout karein
+        // ✅ 'alumni' guard
         Auth::guard('alumni')->logout();
         $request = request();
         $request->session()->invalidate();
@@ -215,69 +224,68 @@ class AlumniAuthController extends Controller
         ], 404);
     }
     public function paymentPage()
-{
-    $user = Auth::guard('alumni')->user();
-    $user->load('accompanyingPersons');
-    
-    // Calculate totals
-    $registrationCharge = $user->amount_paid ?? 0;
-    $accompanyingCharge = $user->accompanyingPersons->sum('charge');
-    $totalAmount = $registrationCharge + $accompanyingCharge;
-    
-    return view('frontend.pages.payment', compact('user', 'registrationCharge', 'accompanyingCharge', 'totalAmount'));
-}
+    {
+        $user = Auth::guard('alumni')->user();
+        $user->load('accompanyingPersons');
 
-public function addAccompanyingFromPayment(Request $request)
-{
-    $user = Auth::guard('alumni')->user();
-    
-    $validated = $request->validate([
-        'belongs_to_pgi' => 'required|boolean',
-        'has_membership' => 'nullable|boolean',
-        'requires_membership' => 'nullable|boolean',
-        'member_id' => 'nullable|string|max:255',
-        'title' => 'required|string|max:10',
-        'full_name' => 'required|string|max:255',
-        'age' => 'required|integer|min:1|max:150',
-        'gender' => 'required|in:Male,Female,Other',
-    ]);
+        // Calculate totals
+        $registrationCharge = $user->amount_paid ?? 0;
+        $accompanyingCharge = $user->accompanyingPersons->sum('charge');
+        $totalAmount = $registrationCharge + $accompanyingCharge;
 
-    // Calculate charge
-    $rateConfig = AccompanyingPersonRate::where('status', true)->first();
-    $baseCharge = $rateConfig ? $rateConfig->base_rate : 5000;
-    $finalCharge = $baseCharge;
-
-    $isAlumni = $request->belongs_to_pgi == 1;
-    $wantsMembership = $request->requires_membership == 1;
-
-    // Apply discount logic
-    if ($isAlumni) {
-        if ($rateConfig && $rateConfig->is_discount_enabled) {
-            $discountAmount = ($baseCharge * $rateConfig->discount_percentage) / 100;
-            $finalCharge = $baseCharge - $discountAmount;
-        }
+        return view('frontend.pages.payment', compact('user', 'registrationCharge', 'accompanyingCharge', 'totalAmount'));
     }
 
-    $user->accompanyingPersons()->create([
-        'name' => $request->full_name,
-        'relation' => 'Accompanying Person',
-        'is_alumni' => $isAlumni,
-        'alumni_membership_id' => $request->member_id,
-        'wants_membership' => $wantsMembership,
-        'charge' => round($finalCharge, 2),
-        'title' => $request->title,
-    ]);
+    public function addAccompanyingFromPayment(Request $request)
+    {
+        $user = Auth::guard('alumni')->user();
 
-    return back()->with('success', 'Accompanying person added successfully!');
-}
+        $validated = $request->validate([
+            'belongs_to_pgi' => 'required|boolean',
+            'has_membership' => 'nullable|boolean',
+            'requires_membership' => 'nullable|boolean',
+            'member_id' => 'nullable|string|max:255',
+            'title' => 'required|string|max:10',
+            'full_name' => 'required|string|max:255',
+            'age' => 'required|integer|min:1|max:150',
+            'gender' => 'required|in:Male,Female,Other',
+        ]);
 
-public function deleteAccompanyingFromPayment($id)
-{
-    $user = Auth::guard('alumni')->user();
-    $person = $user->accompanyingPersons()->findOrFail($id);
-    $person->delete();
-    
-    return back()->with('success', 'Accompanying person removed successfully!');
-}
-}
+        // Calculate charge
+        $rateConfig = AccompanyingPersonRate::where('status', true)->first();
+        $baseCharge = $rateConfig ? $rateConfig->base_rate : 5000;
+        $finalCharge = $baseCharge;
 
+        $isAlumni = $request->belongs_to_pgi == 1;
+        $wantsMembership = $request->requires_membership == 1;
+
+        // Apply discount logic
+        if ($isAlumni) {
+            if ($rateConfig && $rateConfig->is_discount_enabled) {
+                $discountAmount = ($baseCharge * $rateConfig->discount_percentage) / 100;
+                $finalCharge = $baseCharge - $discountAmount;
+            }
+        }
+
+        $user->accompanyingPersons()->create([
+            'name' => $request->full_name,
+            'relation' => 'Accompanying Person',
+            'is_alumni' => $isAlumni,
+            'alumni_membership_id' => $request->member_id,
+            'wants_membership' => $wantsMembership,
+            'charge' => round($finalCharge, 2),
+            'title' => $request->title,
+        ]);
+
+        return back()->with('success', 'Accompanying person added successfully!');
+    }
+
+    public function deleteAccompanyingFromPayment($id)
+    {
+        $user = Auth::guard('alumni')->user();
+        $person = $user->accompanyingPersons()->findOrFail($id);
+        $person->delete();
+
+        return back()->with('success', 'Accompanying person removed successfully!');
+    }
+}

@@ -218,8 +218,10 @@ Route::middleware('auth:alumni')->group(function () {
 
  Route::post('/alumni-profile/add-accompanying', [AlumniAuthController::class, 'addAccompanyingPerson'])->name('alumni.profile.add-accompanying');
     Route::delete('/alumni-profile/delete-accompanying/{id}', [AlumniAuthController::class, 'deleteAccompanyingPerson'])->name('alumni.profile.delete-accompanying');
+    Route::post('/donate', [AlumniRegistrationController::class, 'submitDonation'])->name('alumni.donate');
     });
 
+    
 
     Route::get('/check-alumni-member', [AlumniAuthController::class, 'checkAlumniMember'])->name('check.alumni.member');
 
@@ -228,10 +230,11 @@ Route::middleware('auth:alumni')->group(function () {
     Route::get('/payment', [AlumniRegistrationController::class, 'paymentPage'])->name('alumni.payment');
     Route::post('/payment/add-accompanying', [AlumniRegistrationController::class, 'addAccompanyingFromPayment'])->name('alumni.payment.add-accompanying');
     Route::delete('/payment/delete-accompanying/{id}', [AlumniRegistrationController::class, 'deleteAccompanyingFromPayment'])->name('alumni.payment.delete-accompanying');
-    
+     Route::post('/payment/submit-utr', [AlumniRegistrationController::class, 'submitUtr'])->name('alumni.payment.submit-utr');
     // ✅ Edit Preference Route
     Route::put('/payment/update-preference', [AlumniRegistrationController::class, 'updatePreference'])->name('alumni.payment.update-preference');
 });
+Route::post('/alumni-payments/{payment}/approve', [AlumniRegistrationController::class, 'approvePayment'])->name('alumni-payments.approve');
 
 
 
