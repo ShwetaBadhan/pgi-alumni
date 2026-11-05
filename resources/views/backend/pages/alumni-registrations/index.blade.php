@@ -60,61 +60,72 @@
             <div class="card h-100">
                 <div class="card-body p-0 dataTable-wrapper">
 
-                  <!-- Table Toolbar -->
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
-    <div class="d-flex flex-wrap align-items-center gap-16">
-        
-        <!-- ✅ EXPORT BUTTON (Sabhi filters preserve karega) -->
-        <a href="{{ route('alumni-registrations.export', request()->only(['filter', 'search', 'status'])) }}" 
-           class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20 text-decoration-none text-secondary-light bg-hover-neutral-200">
-            <span class="d-flex align-items-center gap-1 text-sm">
-                <i class="ri-file-excel-2-line text-md line-height-1 text-success"></i>
-                Export Excel
-            </span>
-        </a>
+                    <!-- Table Toolbar -->
+                    <div
+                        class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
+                        <div class="d-flex flex-wrap align-items-center gap-16">
 
-        <!-- Search & Filter Form -->
-        <form class="navbar-search dt-search m-0 d-flex gap-2" action="{{ route('alumni-registrations.index') }}" method="GET">
-            <!-- Hidden inputs taaki search/submit karte waqt filters na hate -->
-            @if(request('filter'))
-                <input type="hidden" name="filter" value="{{ request('filter') }}">
-            @endif
+                            <!-- ✅ EXPORT BUTTON (Sabhi filters preserve karega) -->
+                            <a href="{{ route('alumni-registrations.export', request()->only(['filter', 'search', 'status'])) }}"
+                                class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20 text-decoration-none text-secondary-light bg-hover-neutral-200">
+                                <span class="d-flex align-items-center gap-1 text-sm">
+                                    <i class="ri-file-excel-2-line text-md line-height-1 text-success"></i>
+                                    Export Excel
+                                </span>
+                            </a>
 
-            <!-- ✅ NEW: Status Filter Dropdown -->
-            <select name="status" class="form-select form-select-sm border-neutral-300" style="min-width: 150px;" onchange="this.form.submit()">
-                <option value="">All Statuses</option>
-                <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                <option value="payment_pending" {{ request('status') == 'payment_pending' ? 'selected' : '' }}>Payment Pending</option>
-                <option value="payment_failed" {{ request('status') == 'payment_failed' ? 'selected' : '' }}>Payment Failed</option>
-                <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>Refunded</option>
-            </select>
+                            <!-- Search & Filter Form -->
+                            <form class="navbar-search dt-search m-0 d-flex gap-2"
+                                action="{{ route('alumni-registrations.index') }}" method="GET">
+                                <!-- Hidden inputs taaki search/submit karte waqt filters na hate -->
+                                @if (request('filter'))
+                                    <input type="hidden" name="filter" value="{{ request('filter') }}">
+                                @endif
 
-            <!-- Search Input -->
-            <div class="input-group" style="max-width: 250px;">
-                <input type="text" class="form-control form-control-sm bg-transparent radius-4" name="search"
-                    value="{{ request('search') }}" placeholder="Search name, email...">
-                <button type="submit" class="btn btn-sm btn-primary border-0">
-                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                </button>
-            </div>
-        </form>
-    </div>
-    
-    <div class="d-flex align-items-center gap-8 text-secondary-light">
-        <span>Rows per page:</span>
-        <div class="dt-length">
-            <select name="dataTable_length" aria-controls="dataTable"
-                class="dt-input form-control form-select"
-                onchange="window.location.href='?per_page='+this.value + window.location.search.replace('?', '&')">
-                <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-            </select>
-        </div>
-    </div>
-</div>
+                                <!-- ✅ NEW: Status Filter Dropdown -->
+                                <select name="status" class="form-select form-select-sm border-neutral-300"
+                                    style="min-width: 150px;" onchange="this.form.submit()">
+                                    <option value="">All Statuses</option>
+                                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>
+                                        Approved</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
+                                    </option>
+                                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                                        Rejected</option>
+                                    <option value="payment_pending"
+                                        {{ request('status') == 'payment_pending' ? 'selected' : '' }}>Payment Pending
+                                    </option>
+                                    <option value="payment_failed"
+                                        {{ request('status') == 'payment_failed' ? 'selected' : '' }}>Payment Failed
+                                    </option>
+                                    <option value="refunded" {{ request('status') == 'refunded' ? 'selected' : '' }}>
+                                        Refunded</option>
+                                </select>
+
+                                <!-- Search Input -->
+                                <div class="input-group" style="max-width: 250px;">
+                                    <input type="text" class="form-control form-control-sm bg-transparent radius-4"
+                                        name="search" value="{{ request('search') }}" placeholder="Search name, email...">
+                                    <button type="submit" class="btn btn-sm btn-primary border-0">
+                                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-8 text-secondary-light">
+                            <span>Rows per page:</span>
+                            <div class="dt-length">
+                                <select name="dataTable_length" aria-controls="dataTable"
+                                    class="dt-input form-control form-select"
+                                    onchange="window.location.href='?per_page='+this.value + window.location.search.replace('?', '&')">
+                                    <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Data Table -->
                     <div class="p-0">
@@ -144,7 +155,7 @@
                                                     </div>
                                                     <div>
                                                         <a href="{{ route('alumni-registrations.show', $reg->id) }}">
-                                                        <p class="fw-medium text-dark mb-0">{{ $reg->full_name }}</p>
+                                                            <p class="fw-medium text-dark mb-0">{{ $reg->full_name }}</p>
                                                         </a>
                                                         <small class="text-muted">{{ $reg->contact_number }}</small>
                                                     </div>
@@ -157,7 +168,9 @@
                                                     {{ $reg->registrationType->name ?? 'N/A' }}
                                                 </span>
                                             </td>
-                                            <td class="fw-medium">₹{{ number_format($reg->total_amount, 2) }}</td>
+                                            <td class="fw-medium">
+                                                ₹{{ number_format($reg->payments->sum('amount'), 2) }}
+                                            </td>
                                             <td>
                                                 @php
                                                     $statusColors = [

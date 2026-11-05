@@ -14,10 +14,11 @@ class AlumniRegistrationController extends Controller
     // 1. ADMIN / BACKEND METHODS
     // ==========================================
 
-    public function index(Request $request)
+        public function index(Request $request)
     {
-        $query = AlumniRegistration::with(['registrationType', 'profile']);
-
+       
+        $query = AlumniRegistration::with(['registrationType', 'profile', 'payments']);
+        
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -194,7 +195,7 @@ class AlumniRegistrationController extends Controller
     {
         DB::beginTransaction();
         try {
-            // 1. Registration Status Approve karein
+            // 1. Approve Registration Status 
             $alumniRegistration->update([
                 'status' => 'approved',
                 'approved_at' => now(),
@@ -316,57 +317,85 @@ class AlumniRegistrationController extends Controller
     // 3. PAYMENT & ACCOMPANYING PERSONS METHODS
     // ==========================================
 
-        public function paymentPage()
+          public function paymentPage()
     {
         $user = Auth::guard('alumni')->user();
         $user->load(['accompanyingPersons', 'payments', 'registrationType']);
 
         $regType = RegistrationType::find($user->registration_type_id);
         $registrationCharge = $regType ? $regType->amount : 0;
-        
-        // ✅ Ye variable wapas add kiya hai taaki Blade file me error na aaye
         $accompanyingCharge = $user->accompanyingPersons()->sum('charge');
         
-        // ✅ New Payment Logic (Sirf session wala amount)
+        // ✅ New Payment Logic 
         $pendingAccCharge = session('pending_accompanying_charge', 0);
         $pendingDonation = session('pending_donation', 0);
         
-        // Balance due sirf naye added items ka hoga
-        $balanceDue = $pendingAccCharge + $pendingDonation;
-
-        // Display ke liye totals
-        $totalAmount = $registrationCharge + $accompanyingCharge + $pendingDonation;
+        // ✅ Total Paid Amount
         $totalPaidEver = $user->payments()->sum('amount');
+        
+        // ✅ Total Required Amount (Registration + Accompanying + Donation)
+        $totalAmount = $registrationCharge + $accompanyingCharge + $pendingDonation;
+        
+        // ✅ Balance Due Calculation:
+       
+        if ($totalPaidEver == 0) {
+            // First payment - Registration fee + pending amounts
+            $balanceDue = $registrationCharge + $pendingAccCharge + $pendingDonation;
+        } else {
+            // Subsequent payments - Only pending amounts
+            $balanceDue = $pendingAccCharge + $pendingDonation;
+        }
 
         return view('frontend.pages.payment', compact(
             'user',
             'registrationCharge',
-            'accompanyingCharge', // ✅ Blade ke liye zaroori
+            'accompanyingCharge',
             'pendingAccCharge',
             'pendingDonation',
             'balanceDue',
-            'totalAmount',        // ✅ Blade ke liye zaroori
+            'totalAmount',
             'totalPaidEver'
         ));
     }
 
-        public function submitUtr(Request $request)
+          public function submitUtr(Request $request)
     {
         $user = Auth::guard('alumni')->user();
 
-        // 1. Session se sirf naye pending amounts lo
+      
         $pendingAccCharge = session('pending_accompanying_charge', 0);
         $pendingDonation = session('pending_donation', 0);
 
-        // ✅ DEBUG: Log me dekhenge ki session me actual value kya hai
+        
+        $regType = RegistrationType::find($user->registration_type_id);
+        $registrationCharge = $regType ? $regType->amount : 0;
+        
+       
+        $totalPaidEver = $user->payments()->sum('amount');
+        
+       
+        if ($totalPaidEver == 0) {
+           
+            $thisPaymentAmount = $registrationCharge + $pendingAccCharge + $pendingDonation;
+        } else {
+          
+            $thisPaymentAmount = $pendingAccCharge + $pendingDonation;
+        }
+        
+      
+        if ($thisPaymentAmount <= 0) {
+            return back()->with('error', 'Payment amount cannot be zero. Please contact support.');
+        }
+
+      
         Log::info('--- PAYMENT SUBMIT DEBUG ---', [
             'user_id' => $user->id,
+            'registration_charge' => $registrationCharge,
             'pending_acc_charge' => $pendingAccCharge,
             'pending_donation' => $pendingDonation,
+            'total_paid_ever' => $totalPaidEver,
+            'final_payment_amount' => $thisPaymentAmount,
         ]);
-
-        // Total amount jo abhi pay hoga (sirf naya wala)
-        $thisPaymentAmount = $pendingAccCharge + $pendingDonation;
 
         $validated = $request->validate([
             'confirm_payment' => 'required|accepted',
@@ -379,22 +408,21 @@ class AlumniRegistrationController extends Controller
             $screenshotPath = $request->file('payment_screenshot')->store('payment-screenshots', 'public');
         }
 
-        // 2. ✅ STRICT TYPE ASSIGNMENT (Koi fallback confusion nahi)
-        $paymentType = 'registration'; // Default fallback
-
-        if ($pendingDonation > 0 && $pendingAccCharge == 0) {
+    
+        $paymentType = 'registration'; // Default
+        
+        if ($pendingDonation > 0 && $pendingAccCharge == 0 && $totalPaidEver >= $registrationCharge) {
             $paymentType = 'donation';
         } elseif ($pendingAccCharge > 0) {
             $paymentType = 'accompanying';
         }
 
-        // ✅ DEBUG: Log me dekhenge ki final type kya decide hua
         Log::info('Payment Type Decided', ['final_type' => $paymentType]);
 
-        // 3. Payment Record Create Karein
+        
         $user->payments()->create([
             'registration_type_id' => $user->registration_type_id,
-            'type' => $paymentType, // Yahan ab sahi type jayega
+            'type' => $paymentType,
             'amount' => $thisPaymentAmount,
             'currency' => 'INR',
             'gateway' => 'manual_upi',
@@ -403,13 +431,13 @@ class AlumniRegistrationController extends Controller
             'status' => 'pending',
         ]);
 
-        // 4. Payment submit ho gayi, ab Session (Pending Bucket) ko khali kar do
+       
         session()->forget('pending_accompanying_charge');
         session()->forget('pending_donation');
 
         $user->update(['status' => 'payment_pending']);
 
-        return redirect()->route('alumni.profile')->with('success', 'New payment details submitted! Admin will verify shortly.');
+        return redirect()->route('alumni.profile')->with('success', 'Payment of INR ' . number_format($thisPaymentAmount, 2) . ' submitted successfully!');
     }
 
     public function addAccompanyingFromPayment(Request $request)
@@ -458,7 +486,7 @@ class AlumniRegistrationController extends Controller
             'donation_amount' => 'required|numeric|min:100'
         ]);
 
-        // ✅ Donation ko bhi "Pending Payment" bucket (session) me daal do
+        
         session(['pending_donation' => $validated['donation_amount']]);
 
         return redirect()->route('alumni.payment')->with('success', 'Donation added! Please complete this new payment via UPI.');

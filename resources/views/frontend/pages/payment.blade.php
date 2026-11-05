@@ -195,12 +195,11 @@
                             </div>
                             <div class="card-body text-center">
                                 @php
-                                
-                                    $upiId = env('UPI_ID', 'default_upi@okicici');
-                                    $merchantName = env('UPI_MERCHANT_NAME', 'PGI Alumni Society');
+                                    $upiId = 'shwetabadhan68-1@okicici';
+                                    $merchantName = 'PGI Alumni Society';
 
                                     $cleanAmount = number_format($balanceDue, 2, '.', '');
-                                    $note = 'Payment - ' . ($user->membership_id ?? 'New');
+                                    $note = 'Balance Payment - ' . ($user->membership_id ?? 'New');
 
                                     $upiString =
                                         "upi://pay?pa={$upiId}&pn=" .
@@ -214,22 +213,20 @@
                                 </div>
 
                                 <div class="alert alert-light border mt-2 text-start small">
-                                    <strong>Payment Breakup:</strong><br>
-                                    @if ($pendingAccCharge > 0)
-                                        • New Accompanying Person(s) Charge: INR
-                                        {{ number_format($pendingAccCharge, 2) }}<br>
-                                    @endif
-                                    @if ($pendingDonation > 0)
-                                        • New Donation Amount: INR {{ number_format($pendingDonation, 2) }}<br>
-                                    @endif
-                                    <hr class="my-1">
-                                    • <strong>Total New Payment (QR Code): INR {{ number_format($balanceDue, 2) }}</strong>
-                                    <br><br>
-                                    <span class="text-muted">
-                                        (Note: Your total historical paid amount is INR
-                                        {{ number_format($totalPaidEver, 2) }}. This QR is only for the newly added items.)
-                                    </span>
-                                </div>
+    <strong>Payment Breakup:</strong><br>
+    @if($pendingAccCharge > 0)
+        • New Accompanying Person(s) Charge: INR {{ number_format($pendingAccCharge, 2) }}<br>
+    @endif
+    @if($pendingDonation > 0)
+        • New Donation Amount: INR {{ number_format($pendingDonation, 2) }}<br>
+    @endif
+    <hr class="my-1">
+    • <strong>Total New Payment (QR Code): INR {{ number_format($balanceDue, 2) }}</strong>
+    <br><br>
+    <span class="text-muted">
+        (Note: Your total historical paid amount is INR {{ number_format($totalPaidEver, 2) }}. This QR is only for the newly added items.)
+    </span>
+</div>
 
                                 <hr class="my-4">
 
