@@ -238,13 +238,53 @@ class AlumniRegistrationController extends Controller
         ]);
     }
 
-        public function storeFrontendRegistration(Request $request)
+           public function storeFrontendRegistration(Request $request)
     {
-        
+        // ✅ LOG 1: Check karein ki request controller tak aa rahi hai ya nahi
+        Log::info('=== REGISTRATION STARTED ===', [
+            'email' => $request->email,
+            'ip' => $request->ip()
+        ]);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'title' => 'required',
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'date_of_birth' => 'required|date',
+            'contact_number' => 'required',
+            'degree_completed' => 'required',
+            'department' => 'required',
+            'email' => 'required|email|unique:alumni_registrations,email',
+            'password' => 'required|min:8|confirmed',
+            'residence_country' => 'required',
+            'registration_type_id' => 'required',
+            'agreed_to_rules' => 'accepted',
+            'cf-turnstile-response' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            // ✅ LOG 2: Agar pehla validation fail hua
+            Log::warning('REGISTRATION: Initial Validation Failed', $validator->errors()->toArray());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Form validation failed. Check the errors below:',
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        Log::info('REGISTRATION: Initial Validation Passed. Checking Captcha...');
+
         $captchaVerification = $this->verifyCloudflareCaptcha($request->input('cf-turnstile-response'));
+        
+        // ✅ LOG 3: Captcha ka exact response log karein
+        Log::info('REGISTRATION: Captcha Response', $captchaVerification);
+
         if (!$captchaVerification['success']) {
+            Log::warning('REGISTRATION: Captcha Failed', $captchaVerification);
             return back()->withErrors(['cf-turnstile-response' => 'CAPTCHA verification failed.'])->withInput();
         }
+
+        Log::info('REGISTRATION: Captcha Passed. Running Main Validation...');
 
         $validated = $request->validate([
             'title' => 'required|in:Dr.,Prof.,Mr.,Mrs.,Ms.',
@@ -267,9 +307,12 @@ class AlumniRegistrationController extends Controller
             'cf-turnstile-response' => 'required',
         ]);
 
+        Log::info('REGISTRATION: Main Validation Passed. Starting DB Transaction...');
+
         DB::beginTransaction();
         try {
             $regType = RegistrationType::findOrFail($validated['registration_type_id']);
+            Log::info('REGISTRATION: Registration Type Found', ['type_id' => $regType->id, 'name' => $regType->name]);
 
             // 1. Core Record
             $registration = AlumniRegistration::create([
@@ -278,6 +321,7 @@ class AlumniRegistrationController extends Controller
                 'registration_type_id' => $validated['registration_type_id'],
                 'status' => 'payment_pending',
             ]);
+            Log::info('REGISTRATION: Core Record Created', ['user_id' => $registration->id]);
 
             // 2. Profile Record
             $registration->profile()->create([
@@ -294,28 +338,44 @@ class AlumniRegistrationController extends Controller
                 'department' => $validated['department'],
                 'residence_country' => $validated['residence_country'],
             ]);
+            Log::info('REGISTRATION: Profile Record Created');
 
             // 3. Document Record
-            $photoPath = $request->hasFile('profile_photo_path') ? $request->file('profile_photo_path')->store('alumni-photos', 'public') : null;
+            $photoPath = null;
+            if ($request->hasFile('profile_photo_path')) {
+                $photoPath = $request->file('profile_photo_path')->store('alumni-photos', 'public');
+                Log::info('REGISTRATION: Photo Uploaded', ['path' => $photoPath]);
+            }
 
             $registration->documents()->create([
                 'profile_photo_path' => $photoPath,
                 'agreed_to_rules' => true,
             ]);
+            Log::info('REGISTRATION: Document Record Created');
 
             DB::commit();
-            Auth::guard('alumni')->login($registration);
+            Log::info('REGISTRATION: DB Committed Successfully!');
 
-            // ✅ NEW: If the user has selected a donation directly from the registration form, add it to the session
+            Auth::guard('alumni')->login($registration);
+            Log::info('REGISTRATION: User Logged In');
+
             if (isset($validated['donation_amount']) && $validated['donation_amount'] > 0) {
                 session(['pending_donation' => $validated['donation_amount']]);
+                Log::info('REGISTRATION: Donation added to session', ['amount' => $validated['donation_amount']]);
             }
 
+            Log::info('=== REGISTRATION COMPLETED SUCCESSFULLY ===');
             return redirect()->route('alumni.payment')->with('success', 'Registration successful! Please complete your payment.');
             
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Frontend Registration Error: ' . $e->getMessage());
+            // ✅ LOG 4: Exact error aur uski line number capture karein
+            Log::error('=== REGISTRATION FAILED ===', [
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->with('error', 'Registration failed: ' . $e->getMessage())->withInput();
         }
     }
