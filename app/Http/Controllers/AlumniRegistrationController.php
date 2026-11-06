@@ -118,7 +118,7 @@ class AlumniRegistrationController extends Controller
     {
         // ✅ Load 'profile', 'documents', and 'payments' relationships
         $alumniRegistration->load(['profile', 'documents', 'payments']);
-        
+
         return view('backend.pages.alumni-registrations.edit', [
             'alumniRegistration' => $alumniRegistration,
             'titles' => config('alumni_options.titles'),
@@ -162,11 +162,11 @@ class AlumniRegistrationController extends Controller
                 'payment_transaction_date' => $validated['payment_transaction_date'],
                 'payment_transaction_id' => $validated['payment_transaction_id'],
             ];
-            
+
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
             }
-            
+
             $alumniRegistration->update($updateData);
 
             $alumniRegistration->profile()->update([
@@ -381,13 +381,13 @@ class AlumniRegistrationController extends Controller
 
         $regType = RegistrationType::find($user->registration_type_id);
         $registrationCharge = $regType ? $regType->amount : 0;
-        
+
         // Calculate actual accompanying persons total charge from database
         $actualAccompanyingCharge = $user->accompanyingPersons()->sum('charge');
-        
+
         // Total amount user has paid so far
         $totalPaidEver = $user->payments()->sum('amount');
-        
+
         $pendingDonation = session('pending_donation', 0);
         $pendingAccCharge = session('pending_accompanying_charge', 0);
 
@@ -400,7 +400,7 @@ class AlumniRegistrationController extends Controller
 
         // Total Required Amount
         $totalAmount = $registrationCharge + $actualAccompanyingCharge + $pendingDonation;
-        
+
         // Balance Due Calculation
         if ($totalPaidEver == 0) {
             // First payment - Registration fee + pending amounts
@@ -436,7 +436,7 @@ class AlumniRegistrationController extends Controller
         $registrationCharge = $regType ? $regType->amount : 0;
 
         $totalPaidEver = $user->payments()->sum('amount');
-        
+
         if ($totalPaidEver == 0) {
             $thisPaymentAmount = $registrationCharge + $pendingAccCharge + $pendingDonation;
         } else {
@@ -462,12 +462,12 @@ class AlumniRegistrationController extends Controller
         try {
             // ✅ FIX: If it's the first payment and includes a donation, create separate records for proper accounting
             if ($totalPaidEver == 0 && $pendingDonation > 0) {
-                
+
                 // 1. Payment record for Registration (and Accompanying if applicable)
                 $user->payments()->create([
                     'registration_type_id' => $user->registration_type_id,
                     'type' => 'registration',
-                    'amount' => $registrationCharge + $pendingAccCharge, 
+                    'amount' => $registrationCharge + $pendingAccCharge,
                     'currency' => 'INR',
                     'gateway' => 'manual_upi',
                     'utr_number' => $validated['payment_transaction_id'],
@@ -486,11 +486,10 @@ class AlumniRegistrationController extends Controller
                     'screenshot_path' => $screenshotPath,
                     'status' => 'pending',
                 ]);
-
             } else {
                 // Normal single payment record (when only one item is being paid)
                 $paymentType = 'registration'; // Default
-                
+
                 if ($pendingDonation > 0 && $pendingAccCharge == 0 && $totalPaidEver >= $registrationCharge) {
                     $paymentType = 'donation';
                 } elseif ($pendingAccCharge > 0) {
@@ -517,7 +516,6 @@ class AlumniRegistrationController extends Controller
 
             DB::commit();
             return redirect()->route('alumni.profile')->with('success', 'Payment of INR ' . number_format($thisPaymentAmount, 2) . ' submitted successfully!');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Payment Submission Failed: ' . $e->getMessage());

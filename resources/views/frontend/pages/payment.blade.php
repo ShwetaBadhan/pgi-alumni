@@ -2,6 +2,116 @@
 @section('title', 'Payment | PGI Alumni')
 @section('content')
 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+        .pgi-pay, .pgi-modal {
+            --ink: #14263a; --teal: #1a1974; --teal-soft: #e4f1f0; --gold: #c8963e; --gold-soft: #fbf3e2;
+            --paper: #f4f6f8; --line: #e3e8ee; --muted: #64748b; --danger: #b3261e;
+            font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.55; color: var(--ink);
+        }
+        .pgi-pay { background: var(--paper); padding: 48px 0 56px; }
+        .pgi-pay h5, .pgi-pay h6, .pgi-pay p, .pgi-pay td, .pgi-pay th, .pgi-pay label, .pgi-pay span, .pgi-pay small, .pgi-pay button,
+        .pgi-modal h5, .pgi-modal label, .pgi-modal button, .pgi-modal span { font-family: 'DM Sans', sans-serif; }
+
+        /* Cards */
+        .pgi-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 1px 2px rgba(20,38,58,.04); margin-bottom: 24px; overflow: hidden; }
+        .pgi-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+        .pgi-pay .pgi-card-head h5 { margin: 0; font-size: 18px; font-weight: 700; color: var(--ink); }
+        .pgi-card-head.teal { background: var(--teal); border: 0; }
+        .pgi-pay .pgi-card-head.teal h5 { color: #fff; }
+        .pgi-card-head.green { background: #17693a; border: 0; }
+        .pgi-pay .pgi-card-head.green h5 { color: #fff; }
+        .pgi-card-body { padding: 24px; }
+        .pgi-card-foot { padding: 16px 24px; border-top: 1px solid var(--line); background: #fafbfc; text-align: center; }
+
+        /* Fee rows */
+        .fee-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+        .fee-row:first-child { border-top: 0; }
+        .fee-row .lbl { font-weight: 600; font-size: 16px; }
+        .fee-row .lbl small { display: block; color: var(--muted); font-weight: 400; font-size: 14px; }
+        .fee-row .val { font-weight: 700; font-size: 16px; white-space: nowrap; }
+        .fee-total { background: var(--teal-soft); }
+        .fee-total .lbl { font-size: 18px; }
+        .fee-total .val { font-family: 'Fraunces', serif; font-size: 26px; color: var(--teal); }
+
+        /* Pills */
+        .pgi-pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .pill-yes { background: #dcf3e6; color: #17693a; }
+        .pill-no { background: #eef1f5; color: var(--muted); }
+        .pill-info { background: #dcecf9; color: #1d5a94; }
+        .pill-warn { background: #fdecc8; color: #8a5a00; }
+
+        /* Tables */
+        .pgi-table { width: 100%; border-collapse: collapse; font-size: 15px; background: #fff; }
+        .pgi-table th { background: var(--paper); color: var(--muted); font-size: 14px; font-weight: 600; text-align: left; padding: 12px 16px; white-space: nowrap; }
+        .pgi-table td { padding: 14px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+        .amount { font-weight: 700; color: var(--teal); white-space: nowrap; }
+        .list-wrap { padding: 20px 24px; background: var(--paper); border-top: 1px solid var(--line); display: none; }
+        .list-wrap h6 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+        .list-wrap .tbl-box { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+
+        /* Buttons */
+        .pgi-pay .btn-pgi, .pgi-modal .btn-pgi { background: var(--teal); color: #fff; border: 0; border-radius: 10px; padding: 10px 20px; font-weight: 600; font-size: 15px; line-height: 1.4; cursor: pointer; transition: background .2s; }
+        .pgi-pay .btn-pgi:hover, .pgi-modal .btn-pgi:hover { background: #0b5555; color: #fff; }
+        .pgi-pay .btn-outline, .pgi-modal .btn-outline { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); border-radius: 10px; padding: 9px 20px; font-weight: 600; font-size: 15px; cursor: pointer; }
+        .pgi-pay .btn-outline:hover { background: var(--teal-soft); }
+        .pgi-pay .btn-danger-soft { background: #fff; color: var(--danger); border: 1px solid #f0c9c6; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .pgi-pay .btn-danger-soft:hover { background: #fdf0ef; }
+        .pgi-pay .btn-big { width: 100%; padding: 14px 20px; font-size: 17px; border-radius: 12px; }
+        .pgi-modal .btn-light { background: #fff; border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 9px 20px; font-weight: 600; font-size: 15px; }
+        .pgi-pay :focus-visible, .pgi-modal :focus-visible { outline: 3px solid rgba(15,107,107,.4); outline-offset: 2px; }
+
+        /* Pay section */
+        .qr-box { display: inline-block; padding: 16px; background: #fff; border: 2px solid var(--line); border-radius: 14px; }
+        .breakup { text-align: left; background: var(--gold-soft); border: 1px solid #ecd9ab; border-radius: 12px; padding: 16px 18px; margin-top: 18px; font-size: 15px; }
+        .breakup .line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+        .breakup .line.total { border-top: 1px solid #e3cf9e; margin-top: 6px; padding-top: 10px; font-weight: 700; font-size: 17px; }
+        .breakup .note { margin-top: 10px; color: #6b5a2c; font-size: 14px; }
+        .step-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+        .pgi-pay .form-label { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .pgi-pay .form-control, .pgi-modal .form-control { border-radius: 10px; min-height: 46px; font-size: 16px; }
+        .warn-box { display: flex; gap: 12px; align-items: flex-start; background: #fdf0ef; border: 1px solid #f0c9c6; color: #7a1c16; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; font-size: 15px; }
+        .warn-box i { font-size: 20px; margin-top: 1px; }
+        .confirm-box { display: flex; gap: 12px; align-items: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; }
+        .confirm-box input { width: 20px; height: 20px; margin-top: 3px; flex: none; accent-color: var(--teal); }
+        .confirm-box label { font-size: 15px; font-weight: 500; }
+
+        .done { text-align: center; padding: 36px 24px; }
+        .done .tick { width: 64px; height: 64px; border-radius: 50%; background: #dcf3e6; color: #17693a; display: grid; place-items: center; font-size: 30px; margin: 0 auto 14px; }
+        .done h5 { font-family: 'Fraunces', serif; font-size: 24px; margin-bottom: 8px; }
+        .done p { font-size: 16px; margin-bottom: 8px; }
+        .done .muted { color: var(--muted); font-size: 15px; }
+
+        .pgi-pay .alert { border-radius: 12px; font-size: 15px; }
+
+        /* Modals */
+        .pgi-modal .modal-content { border: 0; border-radius: 16px; overflow: hidden; }
+        .pgi-modal .modal-header { background: var(--ink); border: 0; padding: 18px 24px; }
+        .pgi-modal .modal-title { font-family: 'Fraunces', serif; font-size: 22px; color: #fff; }
+        .pgi-modal .btn-close { filter: invert(1); }
+        .pgi-modal .modal-body { background: var(--paper); padding: 24px; }
+        .pgi-modal .modal-footer { border-top: 1px solid var(--line); }
+        .pgi-modal .q-block { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+        .pgi-modal .q-title { display: block; font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+        .pgi-modal .form-label { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .pgi-modal .form-label.small { font-size: 14px; }
+        .pgi-modal .form-check-label { font-size: 16px; }
+        .pgi-modal .form-check-input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; }
+        .pgi-modal .form-check-input:checked { background-color: var(--teal); border-color: var(--teal); }
+        .pgi-modal .form-check-inline { margin-right: 24px; }
+        .pgi-modal .reg-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 2px solid var(--line); border-radius: 12px; background: #fff; margin-bottom: 10px; cursor: pointer; }
+        .pgi-modal .reg-option:has(input:checked) { border-color: var(--teal); background: var(--teal-soft); }
+        .pgi-modal .reg-option input { margin: 0; }
+        .pgi-modal .reg-option span { font-size: 16px; font-weight: 600; }
+
+        @media (max-width: 767px) {
+            .pgi-pay { padding: 28px 0 40px; }
+            .fee-row, .pgi-card-head, .pgi-card-body { padding-left: 16px; padding-right: 16px; }
+        }
+        @media (prefers-reduced-motion: reduce) { .pgi-pay *, .pgi-modal * { transition: none !important; } }
+    </style>
+
     <!-- Breadcrumb -->
     <div class="rbt-breadcrumb-default ptb--100 ptb_md--50 ptb_sm--30 bg-gradient-1">
         <div class="container">
@@ -23,7 +133,7 @@
     </div>
 
     <!-- Payment Content -->
-    <div class="rbt-about-area about-style-1 bg-color-white rbt-section-gap">
+    <div class="pgi-pay">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-10">
@@ -35,165 +145,116 @@
                         </div>
                     @endif
 
-                    <!-- Payment Details Card -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Payment Details</h5>
+                    <!-- Order summary -->
+                    <div class="pgi-card">
+                        <div class="pgi-card-head"><h5>Payment summary</h5></div>
+
+                        <div class="fee-row">
+                            <span class="lbl">Registration type</span>
+                            <span class="val">{{ $user->registrationType->name ?? 'N/A' }}</span>
                         </div>
-                        <div class="card-body">
-                            <table class="table table-borderless mb-0">
-                                <tbody>
-                                    <tr>
-                                        <td class="fw-semibold">Paying for type of registration:</td>
-                                        <td class="text-end">{{ $user->registrationType->name ?? 'N/A' }}</td>
-                                    </tr>
-                                    <tr class="border-top">
-                                        <td class="fw-semibold">Membership Fee:</td>
-                                        <td class="text-end">INR {{ number_format($registrationCharge, 2) }}</td>
-                                    </tr>
-                                    @if (str_contains($user->registrationType->name ?? '', 'Summit'))
-                                        <tr class="border-top">
-                                            <td class="fw-semibold">Global PGI Alumni Summit 2026 Fee:</td>
-                                            <td class="text-end">INR 5,000.00</td>
-                                        </tr>
-                                    @endif
-
-                                    <!-- Accompanying Persons Section -->
-                                    <tr class="border-top">
-                                        <td class="fw-semibold">
-                                            {{ $user->accompanyingPersons->count() }} Accompanying Person Charge:
-                                        </td>
-                                        <td class="text-end">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal"
-                                                    data-bs-target="#addAccompanyingModal">
-                                                    <i class="feather icon-plus"></i> Add
-                                                </button>
-                                                @if ($user->accompanyingPersons->isNotEmpty())
-                                                    <button class="btn btn-sm btn-primary" id="viewListBtn"
-                                                        onclick="toggleAccompanyingList()">
-                                                        <i class="feather icon-list"></i> View
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    @if ($user->accompanyingPersons->isNotEmpty())
-                                        <tr class="border-top">
-                                            <td class="fw-bold text-end" colspan="2">
-                                                INR {{ number_format($accompanyingCharge, 2) }}
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($user->accompanyingPersons->isNotEmpty())
-                                        <tr>
-                                            <td colspan="2" class="p-0">
-                                                <div id="accompanyingListSection" class="p-3 bg-light border-top"
-                                                    style="display: none;">
-                                                    <h6 class="fw-bold mb-3">Accompanying Persons List</h6>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-bordered table-hover mb-0 bg-white">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Sr. No.</th>
-                                                                    <th>Name</th>
-                                                                    <th>Age</th>
-                                                                    <th>Belong to PGI</th>
-                                                                    <th>Member</th>
-                                                                    <th>Need Membership</th>
-                                                                    <th>Gender</th>
-                                                                    <th>Amount</th>
-                                                                    <th>Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach ($user->accompanyingPersons as $index => $person)
-                                                                    <tr>
-                                                                        <td>{{ $index + 1 }}</td>
-                                                                        <td>{{ $person->title }} {{ $person->name }}</td>
-                                                                        <td>{{ $person->age ?? 'N/A' }}</td>
-                                                                        <td>
-                                                                            @if ($person->is_alumni)
-                                                                                <span class="badge bg-success">Yes</span>
-                                                                            @else
-                                                                                <span class="badge bg-secondary">No</span>
-                                                                            @endif
-                                                                        </td>
-                                                                        <td>
-                                                                            @if ($person->alumni_membership_id)
-                                                                                <span class="badge bg-info">Yes</span>
-                                                                            @else
-                                                                                <span class="badge bg-secondary">No</span>
-                                                                            @endif
-                                                                        </td>
-                                                                        <td>
-                                                                            @if ($person->wants_membership)
-                                                                                <span
-                                                                                    class="badge bg-warning text-dark">Yes</span>
-                                                                            @else
-                                                                                <span class="badge bg-secondary">No</span>
-                                                                            @endif
-                                                                        </td>
-                                                                        <td>{{ $person->gender ?? 'N/A' }}</td>
-                                                                        <td class="fw-bold text-success">INR
-                                                                            {{ number_format($person->charge, 2) }}</td>
-                                                                        <td>
-                                                                            <form
-                                                                                action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
-                                                                                method="POST"
-                                                                                onsubmit="return confirm('Are you sure you want to remove this person?');">
-                                                                                @csrf
-                                                                                @method('DELETE')
-                                                                                <button type="submit"
-                                                                                    class="btn btn-sm btn-danger">
-                                                                                    <i class="feather icon-trash-2"></i>
-                                                                                    Remove
-                                                                                </button>
-                                                                            </form>
-                                                                        </td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                    <!-- ✅ Missing Block End -->
-
-
-                                    <tr class="border-top">
-                                        <td class="fw-bold">Total:</td>
-                                        <td class="text-end fw-bold text-primary fs-5">INR
-                                            {{ number_format($totalAmount, 2) }}</td>
-                                    </tr>
-                                    <tr class="border-top">
-                                        <td class="fw-semibold">Status:</td>
-                                        <td class="text-end">
-                                            <span class="badge bg-warning text-dark">{{ ucfirst($user->status) }}</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="fee-row">
+                            <span class="lbl">Membership fee</span>
+                            <span class="val">INR {{ number_format($registrationCharge, 2) }}</span>
                         </div>
-                        <div class="card-footer text-center">
-                            <button class="btn btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#editPreferenceModal">
-                                <i class="feather icon-edit"></i> Edit Preference
+                        @if (str_contains($user->registrationType->name ?? '', 'Summit'))
+                            <div class="fee-row">
+                                <span class="lbl">Global PGI Alumni Summit 2026 fee</span>
+                                <span class="val">INR 5,000.00</span>
+                            </div>
+                        @endif
+
+                        <!-- Accompanying persons -->
+                        <div class="fee-row">
+                            <span class="lbl">
+                                Accompanying persons
+                                <small>{{ $user->accompanyingPersons->count() }} added</small>
+                            </span>
+                            <span class="d-flex align-items-center flex-wrap gap-2">
+                                @if ($user->accompanyingPersons->isNotEmpty())
+                                    <span class="val me-2">INR {{ number_format($accompanyingCharge, 2) }}</span>
+                                @endif
+                                <button type="button" class="btn-pgi" data-bs-toggle="modal" data-bs-target="#addAccompanyingModal">
+                                    <i class="feather-plus"></i> Add person
+                                </button>
+                                @if ($user->accompanyingPersons->isNotEmpty())
+                                    <button type="button" class="btn-outline" id="viewListBtn" onclick="toggleAccompanyingList()">
+                                        <i class="feather-list"></i> View list
+                                    </button>
+                                @endif
+                            </span>
+                        </div>
+
+                        @if ($user->accompanyingPersons->isNotEmpty())
+                            <div id="accompanyingListSection" class="list-wrap" style="display: none;">
+                                <h6>Accompanying persons list</h6>
+                                <div class="tbl-box table-responsive">
+                                    <table class="pgi-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Name</th>
+                                                <th>Age</th>
+                                                <th>Gender</th>
+                                                <th>Belongs to PGI</th>
+                                                <th>Member</th>
+                                                <th>Needs membership</th>
+                                                <th>Amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($user->accompanyingPersons as $index => $person)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td class="fw-semibold">{{ $person->title }} {{ $person->name }}</td>
+                                                    <td>{{ $person->age ?? 'N/A' }}</td>
+                                                    <td>{{ $person->gender ?? 'N/A' }}</td>
+                                                    <td><span class="pgi-pill {{ $person->is_alumni ? 'pill-yes' : 'pill-no' }}">{{ $person->is_alumni ? 'Yes' : 'No' }}</span></td>
+                                                    <td><span class="pgi-pill {{ $person->alumni_membership_id ? 'pill-info' : 'pill-no' }}">{{ $person->alumni_membership_id ? 'Yes' : 'No' }}</span></td>
+                                                    <td><span class="pgi-pill {{ $person->wants_membership ? 'pill-warn' : 'pill-no' }}">{{ $person->wants_membership ? 'Yes' : 'No' }}</span></td>
+                                                    <td class="amount">INR {{ number_format($person->charge, 2) }}</td>
+                                                    <td>
+                                                        <form action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Are you sure you want to remove this person?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn-danger-soft">
+                                                                <i class="feather-trash-2"></i> Remove
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="fee-row fee-total">
+                            <span class="lbl">Total</span>
+                            <span class="val">INR {{ number_format($totalAmount, 2) }}</span>
+                        </div>
+                        <div class="fee-row">
+                            <span class="lbl">Status</span>
+                            <span class="pgi-pill pill-warn">{{ ucfirst($user->status) }}</span>
+                        </div>
+
+                        <div class="pgi-card-foot">
+                            <button type="button" class="btn-outline" data-bs-toggle="modal" data-bs-target="#editPreferenceModal">
+                                <i class="feather-edit"></i> Edit preference
                             </button>
                         </div>
                     </div>
 
                     @if ($balanceDue > 0)
-                        <div class="card shadow-sm mb-4 border-primary">
-                            <div class="card-header bg-primary text-white text-center">
-                                <h5 class="mb-0"><i class="feather icon-credit-card"></i> Scan to Pay Remaining Balance
-                                    via UPI</h5>
+                        <div class="pgi-card">
+                            <div class="pgi-card-head teal">
+                                <h5><i class="feather-credit-card"></i> Pay the remaining balance via UPI</h5>
                             </div>
-                            <div class="card-body text-center">
+                            <div class="pgi-card-body">
                                 @php
                                     $upiId = 'SBIBHIM.INSTANT94457614306650492@sbipay';
                                     $merchantName = 'PGI Alumni Society';
@@ -208,237 +269,217 @@
                                         urlencode($note);
                                 @endphp
 
-                                <div class="d-inline-block p-3 bg-white border rounded">
-                                    {!! QrCode::size(250)->generate($upiString) !!}
+                                <div class="row g-4">
+                                    <!-- Step 1: scan -->
+                                    <div class="col-md-5 text-center">
+                                        <div class="step-title">Step 1: Scan and pay</div>
+                                        <div class="qr-box">
+                                            {!! QrCode::size(220)->generate($upiString) !!}
+                                        </div>
+
+                                        <div class="breakup">
+                                            @if ($pendingAccCharge > 0)
+                                                <div class="line"><span>New accompanying person charge</span><span>INR {{ number_format($pendingAccCharge, 2) }}</span></div>
+                                            @endif
+                                            @if ($pendingDonation > 0)
+                                                <div class="line"><span>New donation</span><span>INR {{ number_format($pendingDonation, 2) }}</span></div>
+                                            @endif
+                                            <div class="line total"><span>Pay now (QR amount)</span><span>INR {{ number_format($balanceDue, 2) }}</span></div>
+                                            <div class="note">
+                                                You have paid INR {{ number_format($totalPaidEver, 2) }} so far. This QR code covers only the newly added items.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: confirm -->
+                                    <div class="col-md-7">
+                                        <div class="step-title">Step 2: Confirm your payment</div>
+                                        <form action="{{ route('alumni.payment.submit-utr') }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="mb-3">
+                                                <label class="form-label">UPI transaction ID (UTR) *</label>
+                                                <input type="text" name="payment_transaction_id" class="form-control"
+                                                    placeholder="e.g., 324567890123" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Upload payment screenshot *</label>
+                                                <input type="file" name="payment_screenshot" class="form-control"
+                                                    accept="image/*,.pdf" required>
+                                            </div>
+
+                                            <div class="warn-box">
+                                                <i class="feather-alert-triangle"></i>
+                                                <span><strong>Warning:</strong> A fake UTR will get your payment rejected.</span>
+                                            </div>
+
+                                            <div class="confirm-box">
+                                                <input type="checkbox" id="confirmPayment" name="confirm_payment" required>
+                                                <label for="confirmPayment">
+                                                    I confirm that I have transferred <strong>INR {{ number_format($balanceDue, 2) }}</strong> via UPI.
+                                                </label>
+                                            </div>
+
+                                            <button type="submit" class="btn-pgi btn-big">
+                                                <i class="feather-check-circle"></i> Submit payment details
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
-
-                                <div class="alert alert-light border mt-2 text-start small">
-    <strong>Payment Breakup:</strong><br>
-    @if($pendingAccCharge > 0)
-        • New Accompanying Person(s) Charge: INR {{ number_format($pendingAccCharge, 2) }}<br>
-    @endif
-    @if($pendingDonation > 0)
-        • New Donation Amount: INR {{ number_format($pendingDonation, 2) }}<br>
-    @endif
-    <hr class="my-1">
-    • <strong>Total New Payment (QR Code): INR {{ number_format($balanceDue, 2) }}</strong>
-    <br><br>
-    <span class="text-muted">
-        (Note: Your total historical paid amount is INR {{ number_format($totalPaidEver, 2) }}. This QR is only for the newly added items.)
-    </span>
-</div>
-
-                                <hr class="my-4">
-
-                                <h6 class="fw-bold text-start mb-3">Step 2: Confirm Your Payment</h6>
-                                <form action="{{ route('alumni.payment.submit-utr') }}" method="POST"
-                                    enctype="multipart/form-data" class="text-start">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">UPI Transaction ID (UTR) *</label>
-                                        <input type="text" name="payment_transaction_id" class="form-control"
-                                            placeholder="e.g., 324567890123" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Upload Payment Screenshot *</label>
-                                        <input type="file" name="payment_screenshot" class="form-control"
-                                            accept="image/*,.pdf" required>
-                                    </div>
-
-                                    <div class="alert alert-danger border-danger mb-3">
-                                        <i class="feather icon-alert-triangle me-2"></i>
-                                        <strong>Warning:</strong> Providing a fake UTR will result in rejection.
-                                    </div>
-
-                                    <div class="mb-4 form-check p-3 bg-light rounded border">
-                                        <input type="checkbox" class="form-check-input" id="confirmPayment"
-                                            name="confirm_payment" required>
-                                        <label class="form-check-label fw-bold small" for="confirmPayment">
-                                            I confirm that I have transferred <strong>INR
-                                                {{ number_format($balanceDue, 2) }}</strong> via UPI.
-                                        </label>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-success w-100 btn-lg mt-2">
-                                        <i class="feather icon-check-circle"></i> Submit Payment Details
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     @else
-                        <div class="card shadow-sm mb-4 border-success">
-                            <div class="card-header bg-success text-white text-center">
-                                <h5 class="mb-0"><i class="feather icon-check-circle"></i> Payment Completed!</h5>
+                        <div class="pgi-card">
+                            <div class="pgi-card-head green">
+                                <h5><i class="feather-check-circle"></i> Payment completed</h5>
                             </div>
-                            <div class="card-body text-center">
-                                <div class="alert alert-success mb-0">
-                                    <h5 class="alert-heading">Thank You!</h5>
-                                    <p>Your total payment of <strong>INR {{ number_format($totalAmount, 2) }}</strong> has
-                                        been successfully submitted.</p>
-                                    <hr>
-                                    <p class="mb-0 text-start">
-                                        <strong>Current Status:</strong> <span
-                                            class="badge bg-warning text-dark">{{ ucfirst($user->status) }}</span>
-                                    </p>
-                                    <p class="mt-3 text-muted small">
-                                        Our admin team is verifying your payments. You will receive a confirmation email
-                                        once approved.
-                                    </p>
-                                </div>
+                            <div class="done">
+                                <div class="tick"><i class="feather-check"></i></div>
+                                <h5>Thank you!</h5>
+                                <p>Your total payment of <strong>INR {{ number_format($totalAmount, 2) }}</strong> has been submitted.</p>
+                                <p>Current status: <span class="pgi-pill pill-warn">{{ ucfirst($user->status) }}</span></p>
+                                <p class="muted mt-3">Our admin team is verifying your payments. You will get a confirmation email once approved.</p>
                             </div>
                         </div>
                     @endif
+
                 </div>
             </div>
         </div>
     </div>
-    </div>
-    </div>
-    </div>
-    </div>
 
     <!-- Add Accompanying Person Modal -->
-    <div class="modal fade" id="addAccompanyingModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form action="{{ route('alumni.payment.add-accompanying') }}" method="POST">
+    <div class="modal fade pgi-modal" id="addAccompanyingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <form action="{{ route('alumni.payment.add-accompanying') }}" method="POST" class="w-100">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Accompanying Person</h5>
+                        <h5 class="modal-title">Add accompanying person</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
 
-                        <!-- Step 1: Belongs to PGI? -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Does the accompanying person belong to PGI?</label>
+                        <!-- Step 1 -->
+                        <div class="q-block">
+                            <span class="q-title">Does the accompanying person belong to PGI?</span>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsYes"
-                                    value="1" onchange="togglePGIFields()">
+                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsYes" value="1" onchange="togglePGIFields()">
                                 <label class="form-check-label" for="belongsYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsNo"
-                                    value="0" onchange="togglePGIFields()">
+                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsNo" value="0" onchange="togglePGIFields()">
                                 <label class="form-check-label" for="belongsNo">No</label>
                             </div>
                         </div>
 
-                        <!-- Step 2: Has Membership? -->
-                        <div id="hasMembershipSection" class="mb-4" style="display: none;">
-                            <label class="form-label fw-bold">Does the accompanying person have a membership?</label>
+                        <!-- Step 2 -->
+                        <div id="hasMembershipSection" class="q-block" style="display: none;">
+                            <span class="q-title">Does the accompanying person have a membership?</span>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="has_membership"
-                                    id="hasMembershipYes" value="1" onchange="toggleMembershipFields()">
+                                <input class="form-check-input" type="radio" name="has_membership" id="hasMembershipYes" value="1" onchange="toggleMembershipFields()">
                                 <label class="form-check-label" for="hasMembershipYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="has_membership"
-                                    id="hasMembershipNo" value="0" onchange="toggleMembershipFields()">
+                                <input class="form-check-input" type="radio" name="has_membership" id="hasMembershipNo" value="0" onchange="toggleMembershipFields()">
                                 <label class="form-check-label" for="hasMembershipNo">No</label>
                             </div>
                         </div>
 
-                        <!-- Step 3: Requires Membership? -->
-                        <div id="requiresMembershipSection" class="mb-4" style="display: none;">
-                            <label class="form-label fw-bold">Does the accompanying person require a membership?</label>
+                        <!-- Step 3 -->
+                        <div id="requiresMembershipSection" class="q-block" style="display: none;">
+                            <span class="q-title">Does the accompanying person require a membership?</span>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_membership"
-                                    id="requiresYes" value="1" onchange="toggleRequiresFields()">
+                                <input class="form-check-input" type="radio" name="requires_membership" id="requiresYes" value="1" onchange="toggleRequiresFields()">
                                 <label class="form-check-label" for="requiresYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_membership"
-                                    id="requiresNo" value="0" onchange="toggleRequiresFields()">
+                                <input class="form-check-input" type="radio" name="requires_membership" id="requiresNo" value="0" onchange="toggleRequiresFields()">
                                 <label class="form-check-label" for="requiresNo">No</label>
                             </div>
                         </div>
 
-                        <!-- Membership Lookup Fields -->
-                        <div id="membershipLookupSection" class="mb-4" style="display: none;">
-                            <label class="form-label fw-bold">Enter one of below details</label>
+                        <!-- Membership lookup -->
+                        <div id="membershipLookupSection" class="q-block" style="display: none;">
+                            <span class="q-title">Enter one of the details below</span>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label small">Member ID</label>
-                                    <input type="text" name="member_id" id="memberIdInput" class="form-control"
-                                        placeholder="PCAAS1300">
+                                    <input type="text" name="member_id" id="memberIdInput" class="form-control" placeholder="PCAAS1300">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label small">or Email</label>
-                                    <input type="email" name="lookup_email" class="form-control"
-                                        placeholder="email@example.com">
+                                    <input type="email" name="lookup_email" class="form-control" placeholder="email@example.com">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small">Contact Number *</label>
+                                    <label class="form-label small">Contact number *</label>
                                     <div class="input-group">
                                         <span class="input-group-text">🇮🇳 +91</span>
-                                        <input type="tel" name="lookup_contact" class="form-control"
-                                            placeholder="9876543210">
+                                        <input type="tel" name="lookup_contact" class="form-control" placeholder="9876543210">
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-3 text-end">
-                                <button type="button" class="btn btn-info btn-sm" onclick="checkMemberDetails()">
-                                    <i class="feather icon-search"></i> Check Member
+                                <button type="button" class="btn-pgi" onclick="checkMemberDetails()">
+                                    <i class="feather-search"></i> Check member
                                 </button>
                             </div>
                             <div id="memberLookupResult" class="mt-2"></div>
                         </div>
 
-                        <!-- Contact Fields -->
-                        <div id="requiresContactSection" class="mb-4" style="display: none;">
-                            <label class="form-label fw-bold">Enter below details</label>
+                        <!-- Contact -->
+                        <div id="requiresContactSection" class="q-block" style="display: none;">
+                            <span class="q-title">Enter their contact details</span>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Email *</label>
                                     <input type="email" name="email" class="form-control">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Contact Number *</label>
+                                    <label class="form-label">Contact number *</label>
                                     <div class="input-group">
-                                        <span class="input-group-text">🇮 +91</span>
+                                        <span class="input-group-text">🇮🇳 +91</span>
                                         <input type="tel" name="contact_number" class="form-control">
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Step 4: Accompanying Person Details -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Accompanying Person details</label>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Designation *</label>
-                                <div class="rbt-modern-select bg-transparent height-45">
-                                    <select class="w-100" name="title" required>
-                                        <option value="">Designation *</option>
-                                        <option value="Dr.">Dr.</option>
-                                        <option value="Prof.">Prof.</option>
-                                        <option value="Mr.">Mr.</option>
-                                        <option value="Mrs.">Mrs.</option>
-                                        <option value="Ms.">Ms.</option>
-                                    </select>
+                        <!-- Step 4 -->
+                        <div class="q-block mb-0">
+                            <span class="q-title">Accompanying person details</span>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Designation *</label>
+                                    <div class="rbt-modern-select bg-transparent height-45">
+                                        <select class="w-100" name="title" required>
+                                            <option value="">Designation *</option>
+                                            <option value="Dr.">Dr.</option>
+                                            <option value="Prof.">Prof.</option>
+                                            <option value="Mr.">Mr.</option>
+                                            <option value="Mrs.">Mrs.</option>
+                                            <option value="Ms.">Ms.</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-5">
-                                <label class="form-label">Full Name *</label>
-                                <input type="text" name="full_name" id="fullNameInput" class="form-control" required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Age *</label>
-                                <input type="number" name="age" class="form-control" min="1" max="150"
-                                    required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Gender *</label>
-                                <div class="rbt-modern-select bg-transparent height-45">
-                                    <select class="w-100" name="gender" required>
-                                        <option value="">Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                <div class="col-md-5">
+                                    <label class="form-label">Full name *</label>
+                                    <input type="text" name="full_name" id="fullNameInput" class="form-control" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Age *</label>
+                                    <input type="number" name="age" class="form-control" min="1" max="150" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Gender *</label>
+                                    <div class="rbt-modern-select bg-transparent height-45">
+                                        <select class="w-100" name="gender" required>
+                                            <option value="">Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -447,69 +488,59 @@
                         <input type="hidden" name="is_alumni" id="isAlumniHidden" value="0">
                         <input type="hidden" name="wants_membership" id="wantsMembershipHidden" value="0">
                         <input type="hidden" name="alumni_membership_id" id="alumniMembershipIdHidden" value="">
-
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="feather icon-check"></i> Submit
-                        </button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-pgi"><i class="feather-check"></i> Add person</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- Edit Preference Modal (Dynamic) -->
-    <div class="modal fade" id="editPreferenceModal" tabindex="-1" aria-hidden="true">
+
+    <!-- Edit Preference Modal -->
+    <div class="modal fade pgi-modal" id="editPreferenceModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form action="{{ route('alumni.payment.update-preference') }}" method="POST">
+            <form action="{{ route('alumni.payment.update-preference') }}" method="POST" class="w-100">
                 @csrf
                 @method('PUT')
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit Preference</h5>
+                        <h5 class="modal-title">Edit preference</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Registration Type *</label>
-                            @php
-                                $regTypes = \App\Models\RegistrationType::where('status', 'active')->get();
-                            @endphp
-                            @foreach ($regTypes as $index => $regType)
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="registration_type_id"
-                                        id="regType{{ $regType->id }}" value="{{ $regType->id }}"
-                                        {{ $user->registration_type_id == $regType->id ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="regType{{ $regType->id }}">
-                                        {{ $regType->name }}
-
-                                    </label>
-                                </div>
-                            @endforeach
-
-                        </div>
+                        <span class="q-title" style="font-size:17px;font-weight:700;display:block;margin-bottom:12px;">Registration type *</span>
+                        @php
+                            $regTypes = \App\Models\RegistrationType::where('status', 'active')->get();
+                        @endphp
+                        @foreach ($regTypes as $regType)
+                            <label class="reg-option" for="regType{{ $regType->id }}">
+                                <input class="form-check-input" type="radio" name="registration_type_id"
+                                    id="regType{{ $regType->id }}" value="{{ $regType->id }}"
+                                    {{ $user->registration_type_id == $regType->id ? 'checked' : '' }}>
+                                <span>{{ $regType->name }}</span>
+                            </label>
+                        @endforeach
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="feather icon-check"></i> Submit
-                        </button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-pgi"><i class="feather-check"></i> Save preference</button>
                     </div>
                 </div>
             </form>
         </div>
-</div>@endsection
+    </div>
+
+@endsection
 
 @push('scripts')
     <script>
-        // Toggle Accompanying List Visibility
         // Toggle Accompanying List Visibility
         function toggleAccompanyingList() {
             const listSection = document.getElementById('accompanyingListSection');
             const viewListBtn = document.getElementById('viewListBtn');
 
-            // Check if elements exist
             if (!listSection || !viewListBtn) {
                 alert('No accompanying persons added yet!');
                 return;
@@ -517,16 +548,13 @@
 
             if (listSection.style.display === 'none') {
                 listSection.style.display = 'block';
-                viewListBtn.innerHTML = '<i class="feather icon-eye-off"></i> Hide List';
-                viewListBtn.classList.remove('btn-primary');
-                viewListBtn.classList.add('btn-secondary');
+                viewListBtn.innerHTML = '<i class="feather-eye-off"></i> Hide list';
             } else {
                 listSection.style.display = 'none';
-                viewListBtn.innerHTML = '<i class="feather icon-list"></i> View List';
-                viewListBtn.classList.remove('btn-secondary');
-                viewListBtn.classList.add('btn-primary');
+                viewListBtn.innerHTML = '<i class="feather-list"></i> View list';
             }
         }
+
         // Toggle PGI fields
         function togglePGIFields() {
             const belongsYes = document.getElementById('belongsYes').checked;
@@ -608,10 +636,10 @@
                         fullNameInput.value = data.name;
                         alumniMembershipIdHidden.value = memberId;
                         resultDiv.innerHTML =
-                            '<div class="alert alert-success"><i class="feather icon-check-circle"></i> Member found: ' +
+                            '<div class="alert alert-success"><i class="feather-check-circle"></i> Member found: ' +
                             data.name + '</div>';
                     } else {
-                        resultDiv.innerHTML = '<div class="alert alert-danger"><i class="feather icon-x-circle"></i> ' +
+                        resultDiv.innerHTML = '<div class="alert alert-danger"><i class="feather-x-circle"></i> ' +
                             data.message + '</div>';
                     }
                 })
