@@ -195,7 +195,7 @@
                             </div>
                             <div class="card-body text-center">
                                 @php
-                                    $upiId = 'shwetabadhan68-1@okicici';
+                                    $upiId = 'SBIBHIM.INSTANT94457614306650492@sbipay';
                                     $merchantName = 'PGI Alumni Society';
 
                                     $cleanAmount = number_format($balanceDue, 2, '.', '');

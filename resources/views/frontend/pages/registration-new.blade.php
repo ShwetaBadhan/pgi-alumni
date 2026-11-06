@@ -55,10 +55,10 @@
 
                             <!-- Special Banner for MD/DM -->
                             <div class="alert alert-info mt--20 mb-4 border-info">
-                                <h5 class="alert-heading"><i class="feather icon-info"></i> Special Invitation for MD & DM
+                                <h5 class="alert-heading"><i class="feather icon-info"></i> Special Invitation for MD, DM, Junior Resident & Senior Resident
                                     Alumni!</h5>
-                                <p class="mb-0">Currently, we are accepting registrations only for <strong>MD and
-                                        DM</strong> degree holders.
+                                <p class="mb-0">Currently, we are accepting registrations only for <strong>MD,
+                                        DM, Junior Resident and Senior Resident</strong> degree holders.
                                     As a special benefit, your <strong>Alumni Meet (Summit) is absolutely FREE</strong> with
                                     your Membership!</p>
                             </div>
@@ -143,7 +143,7 @@
                             </div>
 
                             <!-- Academic Information -->
-                            <div class="row">
+                            {{-- <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <input type="number" name="year_of_passing" value="{{ old('year_of_passing') }}"
@@ -161,7 +161,7 @@
                                         <span class="focus-border"></span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <!-- Degree & Department -->
                             <div class="row">
@@ -253,7 +253,7 @@
                             </div>
 
                             <!-- Practice Information -->
-                            <div class="row">
+                            {{-- <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <input type="text" name="practice_state" value="{{ old('practice_state') }}">
@@ -269,7 +269,7 @@
                                         <span class="focus-border"></span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             <!-- Registration Type -->
                             <div class=" mt--20">
                                 <label for="registration_type_id" class="static-label fw-bold">
@@ -329,14 +329,16 @@
                                         <option value="0" {{ old('donation_amount', '0') == '0' ? 'selected' : '' }}>
                                             Not interested at this moment
                                         </option>
+                                        <option value="1000" {{ old('donation_amount') == '1000' ? 'selected' : '' }}>
+                                            INR 1,000.00</option>
+                                        <option value="2000" {{ old('donation_amount') == '2000' ? 'selected' : '' }}>
+                                            INR 2,000.00</option>
+                                        <option value="3000" {{ old('donation_amount') == '3000' ? 'selected' : '' }}>
+                                            INR 3,000.00</option>
+                                        <option value="4000" {{ old('donation_amount') == '4000' ? 'selected' : '' }}>
+                                            INR 4,000.00</option>
                                         <option value="5000" {{ old('donation_amount') == '5000' ? 'selected' : '' }}>
                                             INR 5,000.00</option>
-                                        <option value="10000" {{ old('donation_amount') == '10000' ? 'selected' : '' }}>
-                                            INR 10,000.00</option>
-                                        <option value="50000" {{ old('donation_amount') == '50000' ? 'selected' : '' }}>
-                                            INR 50,000.00</option>
-                                        <option value="100000" {{ old('donation_amount') == '100000' ? 'selected' : '' }}>
-                                            INR 100,000.00</option>
                                     </select>
                                 </div>
                             </div>

@@ -35,14 +35,14 @@ class AlumniRegistration extends Authenticatable
         return $this->hasOne(AlumniDocument::class);
     }
 
-       public function payments()
+    public function payments()
     {
         return $this->hasMany(Payment::class, 'registration_id');
     }
 
-        public function accompanyingPersons()
+    public function accompanyingPersons()
     {
-        
+
         return $this->hasMany(AccompanyingPerson::class, 'registration_id');
     }
     public function registrationType()
@@ -57,12 +57,12 @@ class AlumniRegistration extends Authenticatable
         static::creating(function ($registration) {
             if (!$registration->membership_id) {
                 $lastRegistration = self::whereNotNull('membership_id')->orderBy('id', 'desc')->first();
-                if ($lastRegistration && preg_match('/PCAAS(\d+)/', $lastRegistration->membership_id, $matches)) {
+                if ($lastRegistration && preg_match('/PGAAS(\d+)/', $lastRegistration->membership_id, $matches)) {
                     $nextNumber = (int)$matches[1] + 1;
                 } else {
-                    $nextNumber = 1300;
+                    $nextNumber = 001;
                 }
-                $registration->membership_id = 'PCAAS' . $nextNumber;
+                $registration->membership_id = 'PGAAS' . $nextNumber;
             }
         });
     }

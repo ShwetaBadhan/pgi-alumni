@@ -63,12 +63,12 @@ class AlumniAuthController extends Controller
       // ✅ Ensure that the view name is correct (it is 'alumni-profile' according to your code)
         return view('frontend.pages.alumni-profile', compact('user', 'accompanyingRate'));
     }
-    public function logout()
+        public function logout(Request $request)
     {
-        // ✅ 'alumni' guard
+        // ✅ Sirf 'alumni' guard ko logout karein
         Auth::guard('alumni')->logout();
-        $request = request();
-        $request->session()->invalidate();
+        
+        // ✅ Sirf CSRF token regenerate karein (Puri session destroy NAHI karni)
         $request->session()->regenerateToken();
 
         return redirect()->route('home')->with('success', 'Logged out successfully.');

@@ -238,7 +238,7 @@ class AlumniRegistrationController extends Controller
         ]);
     }
 
-    public function storeFrontendRegistration(Request $request)
+        public function storeFrontendRegistration(Request $request)
     {
         $captchaVerification = $this->verifyCloudflareCaptcha($request->input('cf-turnstile-response'));
         if (!$captchaVerification['success']) {
@@ -287,8 +287,8 @@ class AlumniRegistrationController extends Controller
                 'date_of_birth' => $validated['date_of_birth'],
                 'contact_number' => $validated['contact_number'],
                 'whatsapp_number' => $validated['whatsapp_number'],
-                'year_of_passing' => $validated['year_of_passing'],
-                'year_of_joining_faculty' => $validated['year_of_joining_faculty'],
+                'year_of_passing' => $validated['year_of_passing'] ?? null, 
+                'year_of_joining_faculty' => $validated['year_of_joining_faculty'] ?? null,
                 'degree_completed' => $validated['degree_completed'],
                 'department' => $validated['department'],
                 'residence_country' => $validated['residence_country'],
@@ -305,7 +305,13 @@ class AlumniRegistrationController extends Controller
             DB::commit();
             Auth::guard('alumni')->login($registration);
 
+            // ✅ NEW: If the user has selected a donation directly from the registration form, add it to the session
+            if (isset($validated['donation_amount']) && $validated['donation_amount'] > 0) {
+                session(['pending_donation' => $validated['donation_amount']]);
+            }
+
             return redirect()->route('alumni.payment')->with('success', 'Registration successful! Please complete your payment.');
+            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Frontend Registration Error: ' . $e->getMessage());
@@ -317,27 +323,41 @@ class AlumniRegistrationController extends Controller
     // 3. PAYMENT & ACCOMPANYING PERSONS METHODS
     // ==========================================
 
-          public function paymentPage()
+              public function paymentPage()
     {
         $user = Auth::guard('alumni')->user();
         $user->load(['accompanyingPersons', 'payments', 'registrationType']);
 
         $regType = RegistrationType::find($user->registration_type_id);
         $registrationCharge = $regType ? $regType->amount : 0;
-        $accompanyingCharge = $user->accompanyingPersons()->sum('charge');
         
-        // ✅ New Payment Logic 
+        // ✅ Actual accompanying persons ka charge calculate karein
+        $actualAccompanyingCharge = $user->accompanyingPersons()->sum('charge');
+        $actualAccompanyingCount = $user->accompanyingPersons()->count();
+        
+        // ✅ Session se pending amounts
         $pendingAccCharge = session('pending_accompanying_charge', 0);
         $pendingDonation = session('pending_donation', 0);
+        
+        // ✅ VALIDATION: Agar actual accompanying persons 0 hain, toh session ko bhi 0 kar dein
+        if ($actualAccompanyingCount == 0 && $pendingAccCharge > 0) {
+            session(['pending_accompanying_charge' => 0]);
+            $pendingAccCharge = 0;
+        }
+        
+        // ✅ VALIDATION: Agar actual charge aur session me alag hai, toh session ko update karein
+        if ($actualAccompanyingCharge != $pendingAccCharge && $actualAccompanyingCount > 0) {
+            session(['pending_accompanying_charge' => $actualAccompanyingCharge]);
+            $pendingAccCharge = $actualAccompanyingCharge;
+        }
         
         // ✅ Total Paid Amount
         $totalPaidEver = $user->payments()->sum('amount');
         
         // ✅ Total Required Amount (Registration + Accompanying + Donation)
-        $totalAmount = $registrationCharge + $accompanyingCharge + $pendingDonation;
+        $totalAmount = $registrationCharge + $actualAccompanyingCharge + $pendingDonation;
         
         // ✅ Balance Due Calculation:
-       
         if ($totalPaidEver == 0) {
             // First payment - Registration fee + pending amounts
             $balanceDue = $registrationCharge + $pendingAccCharge + $pendingDonation;
@@ -346,10 +366,13 @@ class AlumniRegistrationController extends Controller
             $balanceDue = $pendingAccCharge + $pendingDonation;
         }
 
+        // ✅ Fix: Blade file ke liye variable ka naam same rakhein
+        $accompanyingCharge = $actualAccompanyingCharge;
+
         return view('frontend.pages.payment', compact(
             'user',
             'registrationCharge',
-            'accompanyingCharge',
+            'accompanyingCharge', // ✅ Ab ye sahi string hai, => nahi
             'pendingAccCharge',
             'pendingDonation',
             'balanceDue',
@@ -603,13 +626,22 @@ class AlumniRegistrationController extends Controller
 
     //     return redirect()->route('alumni.payment')->with('success', 'Donation amount added to your payment queue! Please complete payment via UPI.');
     // }
-    public function deleteAccompanyingFromPayment($id)
+       public function deleteAccompanyingFromPayment($id)
     {
         $user = Auth::guard('alumni')->user();
         $person = $user->accompanyingPersons()->findOrFail($id);
+        
+        // ✅ Person ka charge session se minus karein
+        $personCharge = $person->charge;
+        $currentPending = session('pending_accompanying_charge', 0);
+        $newPending = max(0, $currentPending - $personCharge); 
+        
+        session(['pending_accompanying_charge' => $newPending]);
+        
+        // ✅ Ab person ko delete karein
         $person->delete();
 
-        return back()->with('success', 'Accompanying person removed! Please update your payment details.');
+        return back()->with('success', 'Accompanying person removed! Charge of INR ' . number_format($personCharge, 2) . ' deducted from payment.');
     }
 
     public function updatePreference(Request $request)

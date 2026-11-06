@@ -20,6 +20,7 @@ class AbstractSubmission extends Model
     'authors',               
     'co_author',             
     'primary_author_affiliation', 
+    'edit_count', 
 ];
 
     protected $casts = [
@@ -81,9 +82,10 @@ class AbstractSubmission extends Model
     {
         return $this->status === 'reviewer_accepted';
     }
-     public function alumniUser(): BelongsTo
+        public function alumniUser(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\AlumniRegistration::class, 'user_id', 'membership_id');
+    
+        return $this->belongsTo(\App\Models\AlumniRegistration::class, 'user_id', 'id');
     }
 
 }

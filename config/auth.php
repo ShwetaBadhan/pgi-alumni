@@ -42,7 +42,7 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'alumni' => [
+       'alumni' => [
             'driver' => 'session',
             'provider' => 'alumni',
         ],
@@ -65,14 +65,16 @@ return [
     |
     */
 
-    'providers' => [
+     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => App\Models\User::class,
         ],
+
+        // ✅ Alumni Provider Add karein
         'alumni' => [
             'driver' => 'eloquent',
-            'model' => App\Models\AlumniRegistration::class, // 👈 Frontend 
+            'model' => App\Models\AlumniRegistration::class,
         ],
 
         // 'users' => [

@@ -103,8 +103,8 @@ Route::get('/get-your-membership-id', function () {
 })->name('get-your-membership-id');
 
 Route::get('/registration-new', [AlumniRegistrationController::class, 'showRegistrationForm'])->name('registration-new');
-  Route::get('/register', [AlumniRegistrationController::class, 'showRegistrationForm'])->name('alumni.register.create');
-        Route::post('/register', [AlumniRegistrationController::class, 'storeFrontendRegistration'])->name('alumni.register.store');
+Route::get('/register', [AlumniRegistrationController::class, 'showRegistrationForm'])->name('alumni.register.create');
+Route::post('/register', [AlumniRegistrationController::class, 'storeFrontendRegistration'])->name('alumni.register.store');
 // Route::get('/alumni-login', function () {
 //     return view('frontend.pages.alumni-login');
 // })->name('alumni-login');
@@ -166,8 +166,6 @@ Route::middleware('auth')->group(function () {
         Route::post('alumni-registrations/{alumniRegistration}/approve', [AlumniRegistrationController::class, 'approve'])->name('alumni-registrations.approve');
         Route::post('alumni-registrations/{alumniRegistration}/reject', [AlumniRegistrationController::class, 'reject'])->name('alumni-registrations.reject');
         Route::post('alumni-registrations/{alumniRegistration}/send-email', [AlumniRegistrationController::class, 'sendEmail'])->name('alumni-registrations.send-email');
-
-      
     });
 
 
@@ -188,15 +186,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('reviewers', AbstractReviewerController::class);
         Route::post('reviewers/reroute-pending', [AbstractReviewerController::class, 'reroutePending'])->name('reviewers.reroute-pending');
 
-        
+
         Route::post('submissions/bulk-decide', [AbstractSubmissionController::class, 'bulkDecide'])->name('submissions.bulk-decide');
         Route::get('submissions/export', [AbstractSubmissionController::class, 'export'])->name('submissions.export');
+
+
+        Route::get('/abstract-submit/{submission}/edit', [AlumniAbstractSubmissionController::class, 'edit'])->name('alumni.abstract.edit');
+        Route::put('/abstract-submit/{submission}', [AlumniAbstractSubmissionController::class, 'update'])->name('alumni.abstract.update');
     });
-  // ✅ Accompanying Rate Settings (Simple Route)
+    // ✅ Accompanying Rate Settings (Simple Route)
     Route::get('/accompanying-rate', [AccompanyingRateController::class, 'index'])->name('accompanying-rate');
     Route::post('/accompanying-rate', [AccompanyingRateController::class, 'store'])->name('accompanying-rate.store');
-
-
 });
 // ==========================================
 // 4. ALUMNI FRONTEND AUTH ROUTES (MUST BE OUTSIDE THE MAIN AUTH GROUP)
@@ -214,23 +214,23 @@ Route::post('/alumni-logout', [AlumniAuthController::class, 'logout'])->name('al
 
 Route::middleware('auth:alumni')->group(function () {
     Route::get('/alumni-profile', [AlumniAuthController::class, 'profile'])->name('alumni.profile');
-     Route::put('/alumni-profile/update-accompanying', [AlumniAuthController::class, 'updateAccompanying'])->name('alumni.profile.update-accompanying');
+    Route::put('/alumni-profile/update-accompanying', [AlumniAuthController::class, 'updateAccompanying'])->name('alumni.profile.update-accompanying');
 
- Route::post('/alumni-profile/add-accompanying', [AlumniAuthController::class, 'addAccompanyingPerson'])->name('alumni.profile.add-accompanying');
+    Route::post('/alumni-profile/add-accompanying', [AlumniAuthController::class, 'addAccompanyingPerson'])->name('alumni.profile.add-accompanying');
     Route::delete('/alumni-profile/delete-accompanying/{id}', [AlumniAuthController::class, 'deleteAccompanyingPerson'])->name('alumni.profile.delete-accompanying');
     Route::post('/donate', [AlumniRegistrationController::class, 'submitDonation'])->name('alumni.donate');
-    });
-
-    
-
-    Route::get('/check-alumni-member', [AlumniAuthController::class, 'checkAlumniMember'])->name('check.alumni.member');
+});
 
 
-    Route::middleware(['auth:alumni'])->group(function () {
+
+Route::get('/check-alumni-member', [AlumniAuthController::class, 'checkAlumniMember'])->name('check.alumni.member');
+
+
+Route::middleware(['auth:alumni'])->group(function () {
     Route::get('/payment', [AlumniRegistrationController::class, 'paymentPage'])->name('alumni.payment');
     Route::post('/payment/add-accompanying', [AlumniRegistrationController::class, 'addAccompanyingFromPayment'])->name('alumni.payment.add-accompanying');
     Route::delete('/payment/delete-accompanying/{id}', [AlumniRegistrationController::class, 'deleteAccompanyingFromPayment'])->name('alumni.payment.delete-accompanying');
-     Route::post('/payment/submit-utr', [AlumniRegistrationController::class, 'submitUtr'])->name('alumni.payment.submit-utr');
+    Route::post('/payment/submit-utr', [AlumniRegistrationController::class, 'submitUtr'])->name('alumni.payment.submit-utr');
     // ✅ Edit Preference Route
     Route::put('/payment/update-preference', [AlumniRegistrationController::class, 'updatePreference'])->name('alumni.payment.update-preference');
 });
@@ -242,17 +242,22 @@ Route::post('/alumni-payments/{payment}/approve', [AlumniRegistrationController:
 // Alumni Abstract Routes =
 // ==========================================
 Route::middleware(['auth:alumni'])->group(function () {
-    
+
     // Main Pages
     Route::get('/abstract-submit', [AlumniAbstractSubmissionController::class, 'create'])->name('alumni.abstract.create');
     Route::post('/abstract-submit', [AlumniAbstractSubmissionController::class, 'store'])->name('alumni.abstract.store');
-    
+
     Route::get('/my-abstracts', [AlumniAbstractSubmissionController::class, 'mySubmissions'])->name('alumni.abstract.my-submissions');
     Route::get('/abstract-guidelines', [AlumniAbstractSubmissionController::class, 'guidelines'])->name('alumni.abstract.guidelines');
-    
+
     // Edit, Update, Delete (Inko bhi simple rakha hai)
     Route::get('/abstract-submit/{submission}/edit', [AlumniAbstractSubmissionController::class, 'edit'])->name('alumni.abstract.edit');
     Route::put('/abstract-submit/{submission}', [AlumniAbstractSubmissionController::class, 'update'])->name('alumni.abstract.update');
     Route::delete('/abstract-submit/{submission}', [AlumniAbstractSubmissionController::class, 'destroy'])->name('alumni.abstract.destroy');
-    
 });
+
+Route::resource('abstract/submissions', AbstractSubmissionController::class)->names('abstract.submissions');
+// Ya manually:
+// Route::get('abstract/submissions/{submission}/edit', [AbstractSubmissionController::class, 'edit'])->name('abstract.submissions.edit');
+// Route::put('abstract/submissions/{submission}', [AbstractSubmissionController::class, 'update'])->name('abstract.submissions.update');
+Route::get('submissions/{submission}/export-word', [AbstractSubmissionController::class, 'exportWord'])->name('submissions.export-word');

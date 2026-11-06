@@ -66,8 +66,10 @@
                         <i class="feather icon-gift fs-1 me-3 text-success"></i>
                         <div>
                             <h6 class="fw-bold mb-1">🎉 Special Benefit Unlocked!</h6>
-                            <p class="mb-0 small">As a valued member, you get the <strong>Global PGI Alumni Conclave
-                                    absolutely FREE</strong> with your Membership!</p>
+                            <p class="mb-0 small">
+                                As a valued member, you can attend the <strong>Global PGI Alumni Conclave absolutely
+                                    FREE</strong> with your membership worth Rs. 12,000!
+                            </p>
                         </div>
                     </div>
 
@@ -169,7 +171,8 @@
                                                         </td>
                                                         <td>{{ $person->gender ?? 'N/A' }}</td>
                                                         <td class="fw-bold text-success">INR
-                                                            {{ number_format($person->charge, 2) }}</td>
+                                                            {{ number_format($person->charge, 2) }}
+                                                        </td>
                                                         {{-- <td>
                                                             <form
                                                                 action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
@@ -236,7 +239,8 @@
                                                         @endif
                                                     </td>
                                                     <td class="fw-bold text-success">INR
-                                                        {{ number_format($payment->amount, 2) }}</td>
+                                                        {{ number_format($payment->amount, 2) }}
+                                                    </td>
                                                     <td>
                                                         @if ($payment->status == 'pending')
                                                             <span class="badge bg-warning text-dark">Under
@@ -244,8 +248,7 @@
                                                         @elseif($payment->status == 'success')
                                                             <span class="badge bg-success">Verified</span>
                                                         @else
-                                                            <span
-                                                                class="badge bg-secondary">{{ ucfirst($payment->status) }}</span>
+                                                            <span class="badge bg-secondary">{{ ucfirst($payment->status) }}</span>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -268,37 +271,43 @@
                                     ->exists();
                             @endphp
 
-                            @if ($hasDonated)
-                                <div class="alert alert-success mb-0">
-                                    <i class="feather icon-check-circle"></i> Thank you for your generous donation!
-                                </div>
-                            @else
-                                <h6 class="fw-bold mb-3">Please support the PGI Alumni Society well-being through
-                                    meaningful contributions</h6>
-                                <form action="{{ route('alumni.donate') }}" method="POST">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="donation_amount"
-                                                value="5000" id="donate5000" required>
-                                            <label class="form-check-label" for="donate5000">INR 5,000.00</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="donation_amount"
-                                                value="10000" id="donate10000">
-                                            <label class="form-check-label" for="donate10000">INR 10,000.00</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="donation_amount"
-                                                value="50000" id="donate50000">
-                                            <label class="form-check-label" for="donate50000">INR 50,000.00</label>
-                                        </div>
+
+                            <h6 class="fw-bold mb-3">Please support the PGI Alumni Society well-being through
+                                meaningful contributions</h6>
+                            <form action="{{ route('alumni.donate') }}" method="POST">
+                                @csrf
+                                <div class="mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="donation_amount" value="1000"
+                                            id="donate1000" required>
+                                        <label class="form-check-label" for="donate1000">INR 1,000.00</label>
                                     </div>
-                                    <button type="submit" class="btn btn-success btn-sm">
-                                        <i class="feather icon-heart"></i> Proceed to Donate
-                                    </button>
-                                </form>
-                            @endif
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="donation_amount" value="2000"
+                                            id="donate2000">
+                                        <label class="form-check-label" for="donate2000">INR 2,000.00</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="donation_amount" value="3000"
+                                            id="donate3000">
+                                        <label class="form-check-label" for="donate3000">INR 3,000.00</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="donation_amount" value="4000"
+                                            id="donate4000">
+                                        <label class="form-check-label" for="donate4000">INR 4,000.00</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="donation_amount" value="5000"
+                                            id="donate5000">
+                                        <label class="form-check-label" for="donate5000">INR 5,000.00</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="feather icon-heart"></i> Proceed to Donate
+                                </button>
+                            </form>
+
                         </div>
                     </div>
 
@@ -322,13 +331,13 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Does the accompanying person belong to PGI?</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsYes"
-                                    value="1" onchange="togglePGIFields()">
+                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsYes" value="1"
+                                    onchange="togglePGIFields()">
                                 <label class="form-check-label" for="belongsYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsNo"
-                                    value="0" onchange="togglePGIFields()">
+                                <input class="form-check-input" type="radio" name="belongs_to_pgi" id="belongsNo" value="0"
+                                    onchange="togglePGIFields()">
                                 <label class="form-check-label" for="belongsNo">No</label>
                             </div>
                         </div>
@@ -337,13 +346,13 @@
                         <div id="hasMembershipSection" class="mb-4" style="display: none;">
                             <label class="form-label fw-bold">Does the accompanying person have a membership?</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="has_membership"
-                                    id="hasMembershipYes" value="1" onchange="toggleMembershipFields()">
+                                <input class="form-check-input" type="radio" name="has_membership" id="hasMembershipYes"
+                                    value="1" onchange="toggleMembershipFields()">
                                 <label class="form-check-label" for="hasMembershipYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="has_membership"
-                                    id="hasMembershipNo" value="0" onchange="toggleMembershipFields()">
+                                <input class="form-check-input" type="radio" name="has_membership" id="hasMembershipNo"
+                                    value="0" onchange="toggleMembershipFields()">
                                 <label class="form-check-label" for="hasMembershipNo">No</label>
                             </div>
                         </div>
@@ -352,13 +361,13 @@
                         <div id="requiresMembershipSection" class="mb-4" style="display: none;">
                             <label class="form-label fw-bold">Does the accompanying person require a membership?</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_membership"
-                                    id="requiresYes" value="1" onchange="toggleRequiresFields()">
+                                <input class="form-check-input" type="radio" name="requires_membership" id="requiresYes"
+                                    value="1" onchange="toggleRequiresFields()">
                                 <label class="form-check-label" for="requiresYes">Yes</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="requires_membership"
-                                    id="requiresNo" value="0" onchange="toggleRequiresFields()">
+                                <input class="form-check-input" type="radio" name="requires_membership" id="requiresNo"
+                                    value="0" onchange="toggleRequiresFields()">
                                 <label class="form-check-label" for="requiresNo">No</label>
                             </div>
                         </div>
@@ -436,8 +445,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Age *</label>
-                                <input type="number" name="age" class="form-control" min="1" max="150"
-                                    required>
+                                <input type="number" name="age" class="form-control" min="1" max="150" required>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Gender *</label>
@@ -541,12 +549,12 @@
             resultDiv.innerHTML = '<div class="alert alert-info">Searching...</div>';
 
             fetch("{{ route('check.alumni.member') }}?membership_id=" + encodeURIComponent(memberId), {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -566,7 +574,7 @@
         }
 
         // Modal reset on close
-        document.getElementById('addAccompanyingModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('addAccompanyingModal').addEventListener('hidden.bs.modal', function () {
             this.querySelector('form').reset();
             document.getElementById('memberLookupResult').innerHTML = '';
             document.getElementById('hasMembershipSection').style.display = 'none';

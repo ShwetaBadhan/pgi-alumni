@@ -11,7 +11,9 @@
                         <h2 class="title">My Abstract Submissions</h2>
                         <ul class="page-list">
                             <li class="rbt-breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li><div class="icon-right"><i class="feather-chevron-right"></i></div></li>
+                            <li>
+                                <div class="icon-right"><i class="feather-chevron-right"></i></div>
+                            </li>
                             <li class="rbt-breadcrumb-item active">My Submissions</li>
                         </ul>
                     </div>
@@ -25,7 +27,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    
+
                     <div class="d-flex justify-content-end mb-4 gap-2">
                         <a href="{{ route('alumni.abstract.guidelines') }}" class="btn btn-primary">
                             Abstract Guidelines
@@ -45,7 +47,7 @@
                         <table class="table table-bordered table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Abstract ID</th>
+                                    {{-- <th>Abstract ID</th> --}}
                                     <th>Title</th>
                                     <th>Status</th>
                                     <th>Action</th>
@@ -54,14 +56,14 @@
                             <tbody>
                                 @forelse($finalizedSubmissions as $submission)
                                     <tr>
-                                        <td>{{ $submission->abstract_id }}</td>
+                                        {{-- <td>{{ $submission->abstract_id }}</td> --}}
                                         <td>{{ $submission->title }}</td>
                                         <td>
                                             <span class="badge bg-success">{{ ucfirst($submission->status) }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('alumni.abstract.edit', $submission->id) }}" 
-                                               class="btn btn-sm btn-primary">
+                                            <a href="{{ route('alumni.abstract.edit', $submission->id) }}"
+                                                class="btn btn-sm btn-primary">
                                                 <i class="feather icon-edit"></i> Edit
                                             </a>
                                         </td>
@@ -94,13 +96,12 @@
                                             <span class="badge bg-warning text-dark">{{ ucfirst($submission->status) }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('alumni.abstract.edit', $submission->id) }}" 
-                                               class="btn btn-sm btn-info">
+                                            <a href="{{ route('alumni.abstract.edit', $submission->id) }}"
+                                                class="btn btn-sm btn-info">
                                                 <i class="feather icon-edit"></i> Continue
                                             </a>
-                                            <form action="{{ route('alumni.abstract.destroy', $submission->id) }}" 
-                                                  method="POST" class="d-inline" 
-                                                  onsubmit="return confirm('Delete this submission?');">
+                                            <form action="{{ route('alumni.abstract.destroy', $submission->id) }}" method="POST"
+                                                class="d-inline" onsubmit="return confirm('Delete this submission?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -112,7 +113,8 @@
                                 @empty
                                     <tr>
                                         <td colspan="3" class="text-center text-muted">
-                                            No abstract found.... Click <a href="{{ route('alumni.abstract.create') }}">here</a> to Submit the Abstract
+                                            No abstract found.... Click <a href="{{ route('alumni.abstract.create') }}">here</a>
+                                            to Submit the Abstract
                                         </td>
                                     </tr>
                                 @endforelse

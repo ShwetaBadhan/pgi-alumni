@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AbstractSubmission;
+use App\Models\AbstractCategory;
+use App\Models\AbstractTheme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,14 +15,16 @@ class AlumniAbstractSubmissionController extends Controller
     // 1. Form Dikhayein
     public function create()
     {
-        return view('frontend.pages.abstract-submit');
+        $categories = AbstractCategory::where('status', 1)->get();
+        $themes = AbstractTheme::where('status', 1)->get();
+
+        return view('frontend.pages.abstract-submit', compact('categories', 'themes'));
     }
 
-       // 2. Submission Store Karein
     public function store(Request $request)
     {
         Log::info('=== ALUMNI ABSTRACT STORE STARTED ===');
-        
+
         $user = Auth::guard('alumni')->user();
         if (!$user) {
             return redirect()->route('alumni-login')->with('error', 'Please login first.');
@@ -33,39 +37,32 @@ class AlumniAbstractSubmissionController extends Controller
             'authors' => 'nullable|string',
             'co_author' => 'nullable|string',
             'primary_author_affiliation' => 'nullable|string',
+            'category_id' => 'required|exists:abstract_categories,id',
+            'theme_id' => 'required|exists:abstract_themes,id',
         ]);
 
         DB::beginTransaction();
         try {
             $action = $request->input('action', 'draft');
-            
-            $defaultCategoryId = \App\Models\AbstractCategory::first()?->id ?? 1;
-            $defaultThemeId = \App\Models\AbstractTheme::first()?->id ?? 1;
 
             $submission = AbstractSubmission::create([
-                // ✅ YAHAN CHANGE KIYA: $user->id ki jagah $user->membership_id
-                'user_id' => $user->membership_id, 
-                
+                'user_id' => $user->id,
                 'title' => $validated['title'],
                 'abstract_text' => $validated['abstract_text'],
                 'keywords' => $validated['keywords'] ?? null,
                 'authors' => $validated['authors'] ?? null,
                 'co_author' => $validated['co_author'] ?? null,
                 'primary_author_affiliation' => $validated['primary_author_affiliation'] ?? null,
-                'category_id' => $defaultCategoryId, 
-                'theme_id' => $defaultThemeId,    
+                'category_id' => $validated['category_id'],
+                'theme_id' => $validated['theme_id'],
                 'status' => $action === 'finalize' ? 'submitted' : 'draft',
+                'edit_count' => 0, // ✅ Pehli baar banne par 0
             ]);
 
             DB::commit();
-            Log::info('✅ Abstract Saved Successfully!');
-
-            $message = $action === 'finalize' ? 'Abstract finalized successfully!' : 'Abstract saved as draft!';
-            return redirect()->route('alumni.abstract.my-submissions')->with('success', $message);
-            
+            return redirect()->route('alumni.abstract.my-submissions')->with('success', 'Abstract saved successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('❌ Abstract Save Failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to submit abstract: ' . $e->getMessage())->withInput();
         }
     }
@@ -80,28 +77,48 @@ class AlumniAbstractSubmissionController extends Controller
         $deletedSubmissions = AbstractSubmission::onlyTrashed()->where('user_id', $userId)->latest()->get();
 
         return view('frontend.pages.abstract-my-submissions', compact(
-            'finalizedSubmissions', 'incompleteSubmissions', 'deletedSubmissions'
+            'finalizedSubmissions',
+            'incompleteSubmissions',
+            'deletedSubmissions'
         ));
     }
 
     // 4. Edit Form
-    public function edit(AbstractSubmission $submission)
-    {
-        if ($submission->user_id != Auth::guard('alumni')->id()) {
-            abort(403, 'Unauthorized.');
-        }
-        return view('frontend.pages.abstract-submit', compact('submission'));
-    }
-
-    // 5. Update Submission
-    public function update(Request $request, AbstractSubmission $submission)
+    public function edit($id)
     {
         $user = Auth::guard('alumni')->user();
-       
-        if ($submission->user_id != $user->membership_id) {
-            abort(403, 'Unauthorized.');
+        $submission = AbstractSubmission::find($id);
+
+        if (!$submission) abort(404, 'Abstract not found.');
+        if ($submission->user_id != $user->id) abort(403, 'Unauthorized.');
+
+        if ($submission->edit_count >= 3) {
+            return redirect()->route('alumni.abstract.my-submissions')
+                ->with('error', 'You have reached the maximum limit of 3 edits. Please contact the admin for further changes.');
         }
 
+        // ✅ Categories aur Themes wapas pass karein taaki dropdown dikhe
+        $categories = \App\Models\AbstractCategory::where('status', 1)->get();
+        $themes = \App\Models\AbstractTheme::where('status', 1)->get();
+
+        return view('frontend.pages.abstract-submit', compact('submission', 'categories', 'themes'));
+    }
+
+
+    // 5. Update Submission
+    public function update(Request $request, $id)
+    {
+        $user = Auth::guard('alumni')->user();
+        $submission = AbstractSubmission::find($id);
+
+        if (!$submission) return back()->with('error', 'Abstract not found.');
+        if ($submission->user_id != $user->id) abort(403, 'Unauthorized.');
+
+        if ($submission->edit_count >= 3) {
+            abort(403, 'Edit limit reached. Contact admin.');
+        }
+
+        // ✅ VALIDATION: Category aur Theme yahan se HATA diye hain taaki user unhe change na kar sake
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'abstract_text' => 'required|string',
@@ -109,12 +126,14 @@ class AlumniAbstractSubmissionController extends Controller
             'authors' => 'nullable|string',
             'co_author' => 'nullable|string',
             'primary_author_affiliation' => 'nullable|string',
+            // category_id aur theme_id yahan nahi hain
         ]);
 
         DB::beginTransaction();
         try {
             $action = $request->input('action', 'draft');
 
+            // ✅ UPDATE: Category aur Theme yahan update nahi ho rahe, purani value hi rahegi
             $submission->update([
                 'title' => $validated['title'],
                 'abstract_text' => $validated['abstract_text'],
@@ -123,19 +142,23 @@ class AlumniAbstractSubmissionController extends Controller
                 'co_author' => $validated['co_author'] ?? null,
                 'primary_author_affiliation' => $validated['primary_author_affiliation'] ?? null,
                 'status' => $action === 'finalize' ? 'submitted' : 'draft',
+                'edit_count' => $submission->edit_count + 1, // ✅ Edit count badhao
             ]);
 
             DB::commit();
-            return redirect()->route('alumni.abstract.my-submissions')->with('success', 'Abstract updated successfully!');
+            $remaining = 3 - $submission->edit_count;
+            $msg = $remaining > 0 ? "Abstract updated successfully! ({$remaining} edits remaining)" : "Abstract updated successfully! (No more edits allowed)";
+
+            return redirect()->route('alumni.abstract.my-submissions')->with('success', $msg);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to update abstract.')->withInput();
+            return back()->with('error', 'Failed to update abstract: ' . $e->getMessage())->withInput();
         }
     }
-
     // 6. Delete Submission
     public function destroy(AbstractSubmission $submission)
     {
+        // ✅ FIX: $user->id se compare karein
         if ($submission->user_id != Auth::guard('alumni')->id()) {
             abort(403, 'Unauthorized.');
         }
