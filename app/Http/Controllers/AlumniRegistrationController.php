@@ -240,7 +240,7 @@ class AlumniRegistrationController extends Controller
 
            public function storeFrontendRegistration(Request $request)
     {
-         dd('CONTROLLER REACHED!');
+        //  dd('CONTROLLER REACHED!');
         // ✅ LOG 1: Check karein ki request controller tak aa rahi hai ya nahi
         Log::info('=== REGISTRATION STARTED ===', [
             'email' => $request->email,
