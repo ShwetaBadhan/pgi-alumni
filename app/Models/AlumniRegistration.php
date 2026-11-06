@@ -50,27 +50,24 @@ class AlumniRegistration extends Authenticatable
         return $this->belongsTo(RegistrationType::class);
     }
 
-   protected static function boot()
+     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            // Agar membership_id pehle se set nahi hai, toh naya generate karo
             if (empty($model->membership_id)) {
-                // Last registered user ko dhundho
-                $lastRegistration = static::orderBy('id', 'desc')->first();
+                // ✅ FIX: Soft deleted records ko ignore karein (whereNull('deleted_at'))
+                $lastRegistration = static::whereNull('deleted_at')->orderBy('id', 'desc')->first();
                 
                 if ($lastRegistration && preg_match('/PGAAS(\d+)/', $lastRegistration->membership_id, $matches)) {
-                    // Agar last ID 'PGAAS3' thi, toh next 'PGAAS4' banegi
                     $nextNumber = (int)$matches[1] + 1;
                 } else {
-                    // Agar koi purana record nahi hai ya format match nahi hua, toh 1 se shuru karo
                     $nextNumber = 1;
                 }
                 
-                // Unique check (Safety net: agar beech me koi delete hua ho)
+                // ✅ FIX: Unique check me bhi soft deleted ko ignore karein
                 $newId = 'PGAAS' . $nextNumber;
-                while (static::where('membership_id', $newId)->exists()) {
+                while (static::whereNull('deleted_at')->where('membership_id', $newId)->exists()) {
                     $nextNumber++;
                     $newId = 'PGAAS' . $nextNumber;
                 }
