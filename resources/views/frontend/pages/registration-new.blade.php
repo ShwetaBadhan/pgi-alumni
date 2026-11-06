@@ -289,12 +289,12 @@
                                     </select>
                                 </div>
 
-                                <div class="mt-2">
+                                {{-- <div class="mt-2">
                                     <a href="javascript:void(0)" id="eligibilityLink" onclick="openEligibilityModal();"
                                         style="display: none; color: #0d6efd; text-decoration: underline; font-size: 13px;">
                                         Kindly check eligibility to attend summit
                                     </a>
-                                </div>
+                                </div> --}}
 
                                 <div id="chargeBox"
                                     style="display: none; margin-top: 15px; padding: 15px;
@@ -555,11 +555,11 @@
                         chargeDisplay.textContent = 'INR 0';
                     }
 
-                    // Eligibility link show/hide (agar chahiye toh)
-                    const eligibilityLink = document.getElementById('eligibilityLink');
-                    if (eligibilityLink) {
-                        eligibilityLink.style.display = this.value ? 'inline-block' : 'none';
-                    }
+                    // // Eligibility link show/hide (agar chahiye toh)
+                    // const eligibilityLink = document.getElementById('eligibilityLink');
+                    // if (eligibilityLink) {
+                    //     eligibilityLink.style.display = this.value ? 'inline-block' : 'none';
+                    // }
                 });
 
                 // Trigger on load if pre-selected
