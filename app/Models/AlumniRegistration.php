@@ -12,7 +12,6 @@ class AlumniRegistration extends Authenticatable
 
     protected $table = 'alumni_registrations';
 
-    // ✅ Sirf Core Fields (Normalized)
     protected $fillable = [
         'email',
         'password',
@@ -22,9 +21,12 @@ class AlumniRegistration extends Authenticatable
         'comment',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    // ✅ Relationships
+    // Relationships
     public function profile()
     {
         return $this->hasOne(AlumniProfile::class);
@@ -42,45 +44,46 @@ class AlumniRegistration extends Authenticatable
 
     public function accompanyingPersons()
     {
-
         return $this->hasMany(AccompanyingPerson::class, 'registration_id');
     }
+
     public function registrationType()
     {
         return $this->belongsTo(RegistrationType::class);
     }
 
-     protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
+
             if (empty($model->membership_id)) {
-                // ✅ FIX: Soft deleted records ko ignore karein (whereNull('deleted_at'))
-                $lastRegistration = static::whereNull('deleted_at')->orderBy('id', 'desc')->first();
-                
-                if ($lastRegistration && preg_match('/PGAAS(\d+)/', $lastRegistration->membership_id, $matches)) {
-                    $nextNumber = (int)$matches[1] + 1;
-                } else {
-                    $nextNumber = 1;
-                }
-                
-                // ✅ FIX: Unique check me bhi soft deleted ko ignore karein
-                $newId = 'PGAAS' . $nextNumber;
-                while (static::whereNull('deleted_at')->where('membership_id', $newId)->exists()) {
-                    $nextNumber++;
-                    $newId = 'PGAAS' . $nextNumber;
-                }
-                
-                $model->membership_id = $newId;
+
+                // Get maximum membership number from ALL records,
+                // including soft deleted records.
+
+                $lastNumber = static::withTrashed()
+                    ->where('membership_id', 'LIKE', 'PGAAS%')
+                    ->selectRaw(
+                        "MAX(CAST(SUBSTRING(membership_id, 6) AS UNSIGNED)) as max_number"
+                    )
+                    ->value('max_number');
+
+                $nextNumber = ((int) $lastNumber) + 1;
+
+                $model->membership_id = 'PGAAS' . $nextNumber;
             }
         });
     }
 
-
-    // Accessors for easy use in Blade
+    // Accessor
     public function getFullNameAttribute()
     {
-        return trim(($this->profile->title ?? '') . ' ' . ($this->profile->firstname ?? '') . ' ' . ($this->profile->lastname ?? ''));
+        return trim(
+            ($this->profile->title ?? '') . ' ' .
+            ($this->profile->firstname ?? '') . ' ' .
+            ($this->profile->lastname ?? '')
+        );
     }
 }
