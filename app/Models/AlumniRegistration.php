@@ -50,22 +50,36 @@ class AlumniRegistration extends Authenticatable
         return $this->belongsTo(RegistrationType::class);
     }
 
-    // Auto-generate Membership ID
-    protected static function boot()
+   protected static function boot()
     {
         parent::boot();
-        static::creating(function ($registration) {
-            if (!$registration->membership_id) {
-                $lastRegistration = self::whereNotNull('membership_id')->orderBy('id', 'desc')->first();
+
+        static::creating(function ($model) {
+            // Agar membership_id pehle se set nahi hai, toh naya generate karo
+            if (empty($model->membership_id)) {
+                // Last registered user ko dhundho
+                $lastRegistration = static::orderBy('id', 'desc')->first();
+                
                 if ($lastRegistration && preg_match('/PGAAS(\d+)/', $lastRegistration->membership_id, $matches)) {
+                    // Agar last ID 'PGAAS3' thi, toh next 'PGAAS4' banegi
                     $nextNumber = (int)$matches[1] + 1;
                 } else {
-                    $nextNumber = 001;
+                    // Agar koi purana record nahi hai ya format match nahi hua, toh 1 se shuru karo
+                    $nextNumber = 1;
                 }
-                $registration->membership_id = 'PGAAS' . $nextNumber;
+                
+                // Unique check (Safety net: agar beech me koi delete hua ho)
+                $newId = 'PGAAS' . $nextNumber;
+                while (static::where('membership_id', $newId)->exists()) {
+                    $nextNumber++;
+                    $newId = 'PGAAS' . $nextNumber;
+                }
+                
+                $model->membership_id = $newId;
             }
         });
     }
+
 
     // Accessors for easy use in Blade
     public function getFullNameAttribute()
