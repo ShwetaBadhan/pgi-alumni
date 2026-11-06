@@ -5,12 +5,13 @@
     <div class="">
         <div class="sidebar-logo d-flex align-items-center justify-content-between">
             <a href="{{ route('dashboard') }}" class="">
-                <img src="{{ isset($settings) && $settings->logo ? asset('storage/' . $settings->logo) : asset('images/logo.png') }}"
+                <img src="https://pgialumni.teemac.co.in/assets/images/logo/pgi-logo.png" alt="">
+                {{-- <img src="{{ isset($settings) && $settings->logo ? asset('storage/' . $settings->logo) : asset('images/logo.png') }}"
                     alt="site logo" class="light-logo">
                 <img src="{{ isset($settings) && $settings->backend_logo ? asset('storage/' . $settings->backend_logo) : (isset($settings) && $settings->logo ? asset('storage/' . $settings->logo) : asset('images/logo-light.png')) }}"
                     alt="site logo" class="dark-logo">
                 <img src="{{ isset($settings) && $settings->favicon ? asset('storage/' . $settings->favicon) : asset('images/logo-icon.png') }}"
-                    alt="site logo" class="logo-icon">
+                    alt="site logo" class="logo-icon"> --}}
             </a>
             <button type="button" class="text-xxl d-xl-flex d-none line-height-1 sidebar-toggle text-neutral-500"
                 aria-label="Collapse Sidebar">
@@ -40,12 +41,12 @@
 
             {{-- Alumni (Dropdown) --}}
 
-            <li class="dropdown">
-                <a href="javascript:void(0)">
+            <li>
+                <a href="{{ route('alumni-registrations.index') }}">
                     <i class="ri-graduation-cap-line"></i>
                     <span>Alumni</span>
                 </a>
-                <ul class="sidebar-submenu">
+                {{-- <ul class="sidebar-submenu">
 
                     <li>
                         <a href="{{ route('alumni-registrations.index', ['filter' => 'membership']) }}"
@@ -71,7 +72,7 @@
                         </a>
                     </li>
 
-                </ul>
+                </ul> --}}
             </li>
             <li class="dropdown">
                 <a href="javascript:void(0)">
@@ -87,21 +88,21 @@
                 </a>
                     </li>
 
-                    <li>
+                    {{-- <li>
                         <a href="{{ route('abstract.reviewers.index') }}">
                           
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             My Review Queue
                         </a>
-                    </li>
+                    </li> --}}
 
-                    <li>
+                    {{-- <li>
                         <a href="{{ route('alumni-registrations.index') }}">
                             
                             <i class="ri-circle-fill circle-icon w-auto"></i>
                             Reviewer Assignement
                         </a>
-                    </li>
+                    </li> --}}
 
                     <li>
                         <a href="{{ route('abstract.categories.index') }}">

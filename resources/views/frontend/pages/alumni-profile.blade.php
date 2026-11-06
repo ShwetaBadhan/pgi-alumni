@@ -48,8 +48,8 @@
                         <p class="text-muted small mb-3">Email: {{ $user->email }}</p>
 
                         <div class="d-grid gap-2">
-                            <a href="#" class="btn btn-sm btn-primary">Click Here For Accommodations</a>
-                            <button class="btn btn-sm btn-warning">Reset Password</button>
+                            {{-- <a href="#" class="btn btn-sm btn-primary">Click Here For Accommodations</a>
+                            <button class="btn btn-sm btn-warning">Reset Password</button> --}}
                             <form action="{{ route('alumni-logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-danger w-100">Logout</button>

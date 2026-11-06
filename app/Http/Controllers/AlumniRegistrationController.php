@@ -16,7 +16,6 @@ class AlumniRegistrationController extends Controller
 
     public function index(Request $request)
     {
-
         $query = AlumniRegistration::with(['registrationType', 'profile', 'payments']);
 
         if ($request->filled('status')) {
@@ -71,7 +70,7 @@ class AlumniRegistrationController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Core
+            // 1. Core Record
             $registration = AlumniRegistration::create([
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
@@ -79,7 +78,7 @@ class AlumniRegistrationController extends Controller
                 'status' => 'approved',
             ]);
 
-            // 2. Profile
+            // 2. Profile Record
             $registration->profile()->create([
                 'title' => $request->title,
                 'firstname' => $validated['firstname'],
@@ -94,7 +93,7 @@ class AlumniRegistrationController extends Controller
                 'residence_country' => $validated['residence_country'],
             ]);
 
-            // 3. Documents
+            // 3. Document Record
             $photoPath = $request->hasFile('profile_photo_path') ? $request->file('profile_photo_path')->store('alumni-photos', 'public') : null;
             $registration->documents()->create([
                 'profile_photo_path' => $photoPath,
@@ -117,7 +116,9 @@ class AlumniRegistrationController extends Controller
 
     public function edit(AlumniRegistration $alumniRegistration)
     {
-        $alumniRegistration->load('profile');
+        // ✅ Load 'profile', 'documents', and 'payments' relationships
+        $alumniRegistration->load(['profile', 'documents', 'payments']);
+        
         return view('backend.pages.alumni-registrations.edit', [
             'alumniRegistration' => $alumniRegistration,
             'titles' => config('alumni_options.titles'),
@@ -131,14 +132,25 @@ class AlumniRegistrationController extends Controller
 
     public function update(Request $request, AlumniRegistration $alumniRegistration)
     {
+        // ✅ Strict validation for ALL required form fields to ensure errors are caught and displayed
         $validated = $request->validate([
             'email' => 'required|email|unique:alumni_registrations,email,' . $alumniRegistration->id,
             'password' => 'nullable|min:8|confirmed',
             'registration_type_id' => 'required|exists:registration_types,id',
             'status' => 'required|in:pending,payment_pending,approved,rejected,payment_failed,refunded',
+            'title' => 'required|string',
             'firstname' => 'required|string',
+            'middlename' => 'nullable|string',
             'lastname' => 'required|string',
+            'date_of_birth' => 'required|date',
             'contact_number' => 'required|string',
+            'whatsapp_number' => 'nullable|string',
+            'degree_completed' => 'required|string',
+            'department' => 'required|string',
+            'year_of_passing' => 'nullable|integer',
+            'residence_country' => 'required|string',
+            'payment_transaction_date' => 'required|date',
+            'payment_transaction_id' => 'required|string|max:50',
         ]);
 
         DB::beginTransaction();
@@ -147,26 +159,31 @@ class AlumniRegistrationController extends Controller
                 'email' => $validated['email'],
                 'registration_type_id' => $validated['registration_type_id'],
                 'status' => $validated['status'],
+                'payment_transaction_date' => $validated['payment_transaction_date'],
+                'payment_transaction_id' => $validated['payment_transaction_id'],
             ];
+            
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
             }
+            
             $alumniRegistration->update($updateData);
 
             $alumniRegistration->profile()->update([
-                'title' => $request->title,
+                'title' => $validated['title'],
                 'firstname' => $validated['firstname'],
-                'middlename' => $request->middlename,
+                'middlename' => $validated['middlename'],
                 'lastname' => $validated['lastname'],
-                'date_of_birth' => $request->date_of_birth,
+                'date_of_birth' => $validated['date_of_birth'],
                 'contact_number' => $validated['contact_number'],
-                'whatsapp_number' => $request->whatsapp_number,
-                'degree_completed' => $request->degree_completed,
-                'department' => $request->department,
-                'year_of_passing' => $request->year_of_passing,
-                'residence_country' => $request->residence_country,
+                'whatsapp_number' => $validated['whatsapp_number'],
+                'degree_completed' => $validated['degree_completed'],
+                'department' => $validated['department'],
+                'year_of_passing' => $validated['year_of_passing'],
+                'residence_country' => $validated['residence_country'],
             ]);
 
+            // Handle Profile Photo Update
             if ($request->hasFile('profile_photo_path')) {
                 if ($alumniRegistration->documents && $alumniRegistration->documents->profile_photo_path) {
                     Storage::disk('public')->delete($alumniRegistration->documents->profile_photo_path);
@@ -177,10 +194,22 @@ class AlumniRegistrationController extends Controller
                 );
             }
 
+            // ✅ Handle Documentary Proof Update (Added this as it was missing)
+            if ($request->hasFile('documentary_proof')) {
+                if ($alumniRegistration->documents && $alumniRegistration->documents->documentary_proof) {
+                    Storage::disk('public')->delete($alumniRegistration->documents->documentary_proof);
+                }
+                $alumniRegistration->documents()->updateOrCreate(
+                    ['alumni_registration_id' => $alumniRegistration->id],
+                    ['documentary_proof' => $request->file('documentary_proof')->store('alumni-documents', 'public')]
+                );
+            }
+
             DB::commit();
             return redirect()->route('alumni-registrations.index')->with('success', 'Alumni updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Alumni Update Failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to update: ' . $e->getMessage())->withInput();
         }
     }
@@ -202,7 +231,6 @@ class AlumniRegistrationController extends Controller
                 'approved_by' => auth()->id()
             ]);
 
-
             $alumniRegistration->payments()
                 ->where('type', 'registration')
                 ->where('status', 'pending')
@@ -215,6 +243,7 @@ class AlumniRegistrationController extends Controller
             return back()->with('error', 'Failed to approve: ' . $e->getMessage());
         }
     }
+
     public function reject(Request $request, AlumniRegistration $alumniRegistration)
     {
         $request->validate(['rejection_reason' => 'required|string|max:500']);
@@ -241,8 +270,6 @@ class AlumniRegistrationController extends Controller
     public function storeFrontendRegistration(Request $request)
     {
         $captchaVerification = $this->verifyCloudflareCaptcha($request->input('cf-turnstile-response'));
-
-
 
         if (!$captchaVerification['success']) {
             Log::warning('REGISTRATION: Captcha Failed', $captchaVerification);
@@ -333,7 +360,6 @@ class AlumniRegistrationController extends Controller
             return redirect()->route('alumni.payment')->with('success', 'Registration successful! Please complete your payment.');
         } catch (\Exception $e) {
             DB::rollBack();
-            // ✅ LOG 4: Exact error aur uski line number capture karein
             Log::error('=== REGISTRATION FAILED ===', [
                 'error_message' => $e->getMessage(),
                 'error_file' => $e->getFile(),
@@ -355,34 +381,27 @@ class AlumniRegistrationController extends Controller
 
         $regType = RegistrationType::find($user->registration_type_id);
         $registrationCharge = $regType ? $regType->amount : 0;
-
-        // ✅ Actual accompanying persons ka charge calculate karein
+        
+        // Calculate actual accompanying persons total charge from database
         $actualAccompanyingCharge = $user->accompanyingPersons()->sum('charge');
-        $actualAccompanyingCount = $user->accompanyingPersons()->count();
-
-        // ✅ Session se pending amounts
-        $pendingAccCharge = session('pending_accompanying_charge', 0);
-        $pendingDonation = session('pending_donation', 0);
-
-        // ✅ VALIDATION: Agar actual accompanying persons 0 hain, toh session ko bhi 0 kar dein
-        if ($actualAccompanyingCount == 0 && $pendingAccCharge > 0) {
-            session(['pending_accompanying_charge' => 0]);
-            $pendingAccCharge = 0;
-        }
-
-        // ✅ VALIDATION: Agar actual charge aur session me alag hai, toh session ko update karein
-        if ($actualAccompanyingCharge != $pendingAccCharge && $actualAccompanyingCount > 0) {
-            session(['pending_accompanying_charge' => $actualAccompanyingCharge]);
-            $pendingAccCharge = $actualAccompanyingCharge;
-        }
-
-        // ✅ Total Paid Amount
+        
+        // Total amount user has paid so far
         $totalPaidEver = $user->payments()->sum('amount');
+        
+        $pendingDonation = session('pending_donation', 0);
+        $pendingAccCharge = session('pending_accompanying_charge', 0);
 
-        // ✅ Total Required Amount (Registration + Accompanying + Donation)
+        // ✅ SMART FIX: If user has already paid for Registration + Accompanying, 
+        // any old accompanying charge in the session is stale and should be reset to 0.
+        if ($totalPaidEver >= ($registrationCharge + $actualAccompanyingCharge)) {
+            $pendingAccCharge = 0;
+            session()->forget('pending_accompanying_charge');
+        }
+
+        // Total Required Amount
         $totalAmount = $registrationCharge + $actualAccompanyingCharge + $pendingDonation;
-
-        // ✅ Balance Due Calculation:
+        
+        // Balance Due Calculation
         if ($totalPaidEver == 0) {
             // First payment - Registration fee + pending amounts
             $balanceDue = $registrationCharge + $pendingAccCharge + $pendingDonation;
@@ -391,13 +410,13 @@ class AlumniRegistrationController extends Controller
             $balanceDue = $pendingAccCharge + $pendingDonation;
         }
 
-        // ✅ Fix: Blade file ke liye variable ka naam same rakhein
+        // Fix: Keep variable name consistent for Blade file
         $accompanyingCharge = $actualAccompanyingCharge;
 
         return view('frontend.pages.payment', compact(
             'user',
             'registrationCharge',
-            'accompanyingCharge', // ✅ Ab ye sahi string hai, => nahi
+            'accompanyingCharge',
             'pendingAccCharge',
             'pendingDonation',
             'balanceDue',
@@ -410,40 +429,23 @@ class AlumniRegistrationController extends Controller
     {
         $user = Auth::guard('alumni')->user();
 
-
         $pendingAccCharge = session('pending_accompanying_charge', 0);
         $pendingDonation = session('pending_donation', 0);
-
 
         $regType = RegistrationType::find($user->registration_type_id);
         $registrationCharge = $regType ? $regType->amount : 0;
 
-
         $totalPaidEver = $user->payments()->sum('amount');
-
-
+        
         if ($totalPaidEver == 0) {
-
             $thisPaymentAmount = $registrationCharge + $pendingAccCharge + $pendingDonation;
         } else {
-
             $thisPaymentAmount = $pendingAccCharge + $pendingDonation;
         }
-
 
         if ($thisPaymentAmount <= 0) {
             return back()->with('error', 'Payment amount cannot be zero. Please contact support.');
         }
-
-
-        Log::info('--- PAYMENT SUBMIT DEBUG ---', [
-            'user_id' => $user->id,
-            'registration_charge' => $registrationCharge,
-            'pending_acc_charge' => $pendingAccCharge,
-            'pending_donation' => $pendingDonation,
-            'total_paid_ever' => $totalPaidEver,
-            'final_payment_amount' => $thisPaymentAmount,
-        ]);
 
         $validated = $request->validate([
             'confirm_payment' => 'required|accepted',
@@ -456,36 +458,71 @@ class AlumniRegistrationController extends Controller
             $screenshotPath = $request->file('payment_screenshot')->store('payment-screenshots', 'public');
         }
 
+        DB::beginTransaction();
+        try {
+            // ✅ FIX: If it's the first payment and includes a donation, create separate records for proper accounting
+            if ($totalPaidEver == 0 && $pendingDonation > 0) {
+                
+                // 1. Payment record for Registration (and Accompanying if applicable)
+                $user->payments()->create([
+                    'registration_type_id' => $user->registration_type_id,
+                    'type' => 'registration',
+                    'amount' => $registrationCharge + $pendingAccCharge, 
+                    'currency' => 'INR',
+                    'gateway' => 'manual_upi',
+                    'utr_number' => $validated['payment_transaction_id'],
+                    'screenshot_path' => $screenshotPath,
+                    'status' => 'pending',
+                ]);
 
-        $paymentType = 'registration'; // Default
+                // 2. Separate payment record for Donation (with the same UTR)
+                $user->payments()->create([
+                    'registration_type_id' => $user->registration_type_id,
+                    'type' => 'donation',
+                    'amount' => $pendingDonation,
+                    'currency' => 'INR',
+                    'gateway' => 'manual_upi',
+                    'utr_number' => $validated['payment_transaction_id'],
+                    'screenshot_path' => $screenshotPath,
+                    'status' => 'pending',
+                ]);
 
-        if ($pendingDonation > 0 && $pendingAccCharge == 0 && $totalPaidEver >= $registrationCharge) {
-            $paymentType = 'donation';
-        } elseif ($pendingAccCharge > 0) {
-            $paymentType = 'accompanying';
+            } else {
+                // Normal single payment record (when only one item is being paid)
+                $paymentType = 'registration'; // Default
+                
+                if ($pendingDonation > 0 && $pendingAccCharge == 0 && $totalPaidEver >= $registrationCharge) {
+                    $paymentType = 'donation';
+                } elseif ($pendingAccCharge > 0) {
+                    $paymentType = 'accompanying';
+                }
+
+                $user->payments()->create([
+                    'registration_type_id' => $user->registration_type_id,
+                    'type' => $paymentType,
+                    'amount' => $thisPaymentAmount,
+                    'currency' => 'INR',
+                    'gateway' => 'manual_upi',
+                    'utr_number' => $validated['payment_transaction_id'],
+                    'screenshot_path' => $screenshotPath,
+                    'status' => 'pending',
+                ]);
+            }
+
+            // ✅ Clear session since payment was successfully submitted
+            session()->forget('pending_accompanying_charge');
+            session()->forget('pending_donation');
+
+            $user->update(['status' => 'payment_pending']);
+
+            DB::commit();
+            return redirect()->route('alumni.profile')->with('success', 'Payment of INR ' . number_format($thisPaymentAmount, 2) . ' submitted successfully!');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Payment Submission Failed: ' . $e->getMessage());
+            return back()->with('error', 'Payment submission failed. Please try again.');
         }
-
-        Log::info('Payment Type Decided', ['final_type' => $paymentType]);
-
-
-        $user->payments()->create([
-            'registration_type_id' => $user->registration_type_id,
-            'type' => $paymentType,
-            'amount' => $thisPaymentAmount,
-            'currency' => 'INR',
-            'gateway' => 'manual_upi',
-            'utr_number' => $validated['payment_transaction_id'],
-            'screenshot_path' => $screenshotPath,
-            'status' => 'pending',
-        ]);
-
-
-        session()->forget('pending_accompanying_charge');
-        session()->forget('pending_donation');
-
-        $user->update(['status' => 'payment_pending']);
-
-        return redirect()->route('alumni.profile')->with('success', 'Payment of INR ' . number_format($thisPaymentAmount, 2) . ' submitted successfully!');
     }
 
     public function addAccompanyingFromPayment(Request $request)
@@ -521,7 +558,7 @@ class AlumniRegistrationController extends Controller
             'gender' => $request->gender,
         ]);
 
-        // ✅ Is naye charge ko "Pending Payment" bucket (session) me add kar do
+        // ✅ Add this new charge to the "Pending Payment" session bucket
         $currentPending = session('pending_accompanying_charge', 0);
         session(['pending_accompanying_charge' => $currentPending + $finalCharge]);
 
@@ -534,136 +571,24 @@ class AlumniRegistrationController extends Controller
             'donation_amount' => 'required|numeric|min:100'
         ]);
 
-
         session(['pending_donation' => $validated['donation_amount']]);
 
         return redirect()->route('alumni.payment')->with('success', 'Donation added! Please complete this new payment via UPI.');
     }
-    // public function submitUtr(Request $request)
-    // {
-    //     $user = Auth::guard('alumni')->user();
 
-    //     $regType = RegistrationType::find($user->registration_type_id);
-    //     $registrationCharge = $regType ? $regType->amount : 0;
-    //     $accompanyingCharge = $user->accompanyingPersons()->sum('charge');
-    //     $donationCharge = session('pending_donation', 0);
-
-    //     // ✅ Same Foolproof Logic
-    //     $coreTotal = $registrationCharge + $accompanyingCharge;
-    //     $corePaid = $user->payments()->where('type', '!=', 'donation')->sum('amount');
-    //     $coreBalance = max(0, $coreTotal - $corePaid);
-
-    //     // User abhi exactly yeh amount pay kar raha hai
-    //     $thisPaymentAmount = $coreBalance + $donationCharge;
-
-    //     $validated = $request->validate([
-    //         'confirm_payment' => 'required|accepted',
-    //         'payment_transaction_id' => 'required|string|max:50',
-    //         'payment_screenshot' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-    //     ]);
-
-    //     $screenshotPath = null;
-    //     if ($request->hasFile('payment_screenshot')) {
-    //         $screenshotPath = $request->file('payment_screenshot')->store('payment-screenshots', 'public');
-    //     }
-
-    //     // ✅ Payment Type Decide Karein
-    //     $paymentType = 'registration'; // Default
-
-    //     // Agar Core bill pura pay ho chuka hai, aur ab sirf Donation bacha hai
-    //     if ($donationCharge > 0 && $coreBalance == 0) {
-    //         $paymentType = 'donation';
-    //     }
-
-    //     // Session clear karein
-    //     if ($donationCharge > 0) {
-    //         session()->forget('pending_donation');
-    //     }
-
-    //     $user->payments()->create([
-    //         'registration_type_id' => $user->registration_type_id,
-    //         'type' => $paymentType,
-    //         'amount' => $thisPaymentAmount,
-    //         'currency' => 'INR',
-    //         'gateway' => 'manual_upi',
-    //         'utr_number' => $validated['payment_transaction_id'],
-    //         'screenshot_path' => $screenshotPath,
-    //         'status' => 'pending',
-    //     ]);
-
-    //     $user->update(['status' => 'payment_pending']);
-
-    //     return redirect()->route('alumni.profile')->with('success', 'Payment details submitted! Admin will verify shortly.');
-    // }
-    // public function addAccompanyingFromPayment(Request $request)
-    // {
-    //     $user = Auth::guard('alumni')->user();
-    //     $validated = $request->validate([
-    //         'belongs_to_pgi' => 'required|boolean',
-    //         'title' => 'required|string|max:10',
-    //         'full_name' => 'required|string|max:255',
-    //         'age' => 'required|integer|min:1|max:150',
-    //         'gender' => 'required|in:Male,Female,Other',
-    //         'requires_membership' => 'nullable|boolean',
-    //         'member_id' => 'nullable|string|max:255',
-    //     ]);
-
-    //     $rateConfig = AccompanyingPersonRate::where('status', true)->first();
-    //     $baseCharge = $rateConfig ? $rateConfig->base_rate : 5000;
-    //     $finalCharge = $baseCharge;
-
-    //     if ($request->belongs_to_pgi == 1 && $rateConfig && $rateConfig->is_discount_enabled) {
-    //         $finalCharge = $baseCharge - (($baseCharge * $rateConfig->discount_percentage) / 100);
-    //     }
-
-    //     // ✅ Accompanying person create karein
-    //     $person = $user->accompanyingPersons()->create([
-    //         'name' => $request->full_name,
-    //         'relation' => 'Accompanying Person',
-    //         'is_alumni' => $request->belongs_to_pgi == 1,
-    //         'alumni_membership_id' => $request->member_id,
-    //         'wants_membership' => $request->requires_membership == 1,
-    //         'charge' => round($finalCharge, 2),
-    //         'title' => $request->title,
-    //         'age' => $request->age,
-    //         'gender' => $request->gender,
-    //     ]);
-
-    //     // ✅ Debug: Log me likhein ki person save hua ya nahi
-    //     Log::info('Accompanying person created: ', [
-    //         'id' => $person->id,
-    //         'name' => $person->name,
-    //         'charge' => $person->charge,
-    //         'user_id' => $user->id
-    //     ]);
-
-    //     return redirect()->route('alumni.payment')->with('success', 'Accompanying person added! Charge: INR ' . number_format($finalCharge, 2));
-    // }
-
-    // public function submitDonation(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'donation_amount' => 'required|numeric|min:100'
-    //     ]);
-
-    //     // ✅ Save only in the session; do NOT create a payment record in the DB
-    //     session(['pending_donation' => $validated['donation_amount']]);
-
-    //     return redirect()->route('alumni.payment')->with('success', 'Donation amount added to your payment queue! Please complete payment via UPI.');
-    // }
     public function deleteAccompanyingFromPayment($id)
     {
         $user = Auth::guard('alumni')->user();
         $person = $user->accompanyingPersons()->findOrFail($id);
 
-        // ✅ Person ka charge session se minus karein
+        // ✅ Deduct the person's charge from the session
         $personCharge = $person->charge;
         $currentPending = session('pending_accompanying_charge', 0);
         $newPending = max(0, $currentPending - $personCharge);
 
         session(['pending_accompanying_charge' => $newPending]);
 
-        // ✅ Ab person ko delete karein
+        // ✅ Now delete the person
         $person->delete();
 
         return back()->with('success', 'Accompanying person removed! Charge of INR ' . number_format($personCharge, 2) . ' deducted from payment.');
@@ -708,22 +633,19 @@ class AlumniRegistrationController extends Controller
         $filename = 'alumni_registrations_' . date('Y-m-d') . '.xlsx';
         return Excel::download(new AlumniRegistrationsExport($request), $filename);
     }
+
     public function approvePayment($id)
     {
         $payment = Payment::findOrFail($id);
 
-
         $payment->update(['status' => 'success']);
-
 
         $user = $payment->alumniRegistration;
 
         // 3. ✅ AUTO-APPROVE LOGIC
         if ($user && $user->status !== 'approved') {
-
             $regType = RegistrationType::find($user->registration_type_id);
             $requiredAmount = $regType ? $regType->amount : 0;
-
             $totalPaid = $user->payments()->where('status', 'success')->sum('amount');
 
             if ($totalPaid >= $requiredAmount) {

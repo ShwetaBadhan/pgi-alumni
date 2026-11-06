@@ -548,7 +548,7 @@
                             </span>
                             <br>
                             <small style="color: #28a745; font-size: 14px; font-weight: 600; display: block; margin-top: 5px;">
-                                🎉 Conclave Fee (INR 12,000) is FREE! You only need to pay the membership fee.
+                                🎉 Global Alumni Medical Conclave (INR 12,000) is FREE! You only need to pay the membership fee.
                             </small>
                         `;
                     } else {

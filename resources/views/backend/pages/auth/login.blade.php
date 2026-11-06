@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="16x16">
+  <link rel="icon" type="image/png" href="https://pgialumni.teemac.co.in/assets/images/logo/favicon.png" sizes="16x16">
   
   <!-- CSS Files -->
   <link rel="stylesheet" href="{{ asset('css/remixicon.css') }}">
@@ -24,8 +24,9 @@
     <div class="lg-w-50 px-24 py-32 d-flex justify-content-center align-items-center">
       <div class="max-w-540-px mx-auto">
         <a href="{{ route('login') }}" class="">
-          <img src="{{ isset($settings) && $settings->logo ? asset('storage/' . $settings->logo) : asset('images/logo.png') }}" 
-         alt="site logo" class="light-logo">
+          <img src="https://pgialumni.teemac.co.in/assets/images/logo/pgi-logo.png" alt="">
+          {{-- <img src="{{ isset($settings) && $settings->logo ? asset('storage/' . $settings->logo) : asset('images/logo.png') }}"  --}}
+         {{-- alt="site logo" class="light-logo"> --}}
         </a>
         <div class="mt-32 mb-32">
           <h1 class="h6 fw-bold text-primary-light mb-8">Welcome Back 👋</h1>

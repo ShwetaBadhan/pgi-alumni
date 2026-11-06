@@ -206,7 +206,7 @@
                                                                 <i class="ri-edit-2-line"></i> Edit
                                                             </a>
                                                         </li>
-                                                        @if ($reg->status !== 'approved')
+                                                        {{-- @if ($reg->status !== 'approved')
                                                             <li>
                                                                 <form
                                                                     action="{{ route('alumni-registrations.approve', $reg->id) }}"
@@ -226,7 +226,7 @@
                                                                     <i class="ri-close-circle-line"></i> Reject
                                                                 </button>
                                                             </li>
-                                                        @endif
+                                                        @endif --}}
 
                                                         <li>
                                                             <button
