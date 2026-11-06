@@ -1,5 +1,5 @@
 @extends('frontend.layout.master')
-@section('title', 'New Registration | PGI Alumni')
+@section('title', 'PG Students Registration | PGI Alumni')
 @section('content')
 
     <!-- Start breadcrumb Area -->
@@ -8,13 +8,13 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcrumb-inner text-center">
-                        <h2 class="title">New Registration</h2>
+                        <h2 class="title">PG Students Registration</h2>
                         <ul class="page-list">
                             <li class="rbt-breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
                             <li>
                                 <div class="icon-right"><i class="feather-chevron-right"></i></div>
                             </li>
-                            <li class="rbt-breadcrumb-item active">New Registration</li>
+                            <li class="rbt-breadcrumb-item active">PG Students Registration</li>
                         </ul>
                     </div>
                 </div>
@@ -510,7 +510,7 @@
             }
         }
 
-        // 4. Registration Type Amount Update
+               // 4. Registration Type Amount Update (Simple & Direct)
         document.addEventListener('DOMContentLoaded', function() {
             // Scrolling fix on page load
             fixScrolling();
@@ -527,7 +527,7 @@
                 });
             }
 
-            // Registration type dropdown logic
+            // ✅ Registration type dropdown logic
             const registrationSelect = document.getElementById('registration_type_id');
             if (registrationSelect) {
                 registrationSelect.addEventListener('change', function() {
@@ -536,14 +536,29 @@
                     const parsedAmount = Number.isFinite(selectedAmount) ? selectedAmount : 0;
 
                     document.getElementById('amount_paid').value = this.value ? parsedAmount : '';
-                    document.getElementById('chargeDisplay').textContent = 'INR ' + parsedAmount
-                        .toLocaleString('en-IN');
                     document.getElementById('chargeBox').style.display = this.value ? 'block' : 'none';
 
+                    const chargeDisplay = document.getElementById('chargeDisplay');
+                    
+                    // ✅ Koi complex check nahi, bas membership select hone par ye message dikhao
+                    if (this.value) {
+                        chargeDisplay.innerHTML = `
+                            <span style="font-size: 20px; font-weight: bold; color: #2ba5b5;">
+                                INR ${parsedAmount.toLocaleString('en-IN')}
+                            </span>
+                            <br>
+                            <small style="color: #28a745; font-size: 14px; font-weight: 600; display: block; margin-top: 5px;">
+                                🎉 Conclave Fee (INR 12,000) is FREE! You only need to pay the membership fee.
+                            </small>
+                        `;
+                    } else {
+                        chargeDisplay.textContent = 'INR 0';
+                    }
+
+                    // Eligibility link show/hide (agar chahiye toh)
                     const eligibilityLink = document.getElementById('eligibilityLink');
                     if (eligibilityLink) {
-                        eligibilityLink.style.display = selectedOption.textContent.includes(
-                            'Global PGI Alumni Summit') ? 'inline-block' : 'none';
+                        eligibilityLink.style.display = this.value ? 'inline-block' : 'none';
                     }
                 });
 

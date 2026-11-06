@@ -50,7 +50,7 @@
                         <div class="header-info">
                             <div class="header-right-btn d-flex">
                                 <a class="rbt-btn rbt-switch-btn btn-gradient btn-xs"
-                                    href="{{ route('alumni-registration') }}">
+                                    href="{{ route('registration-new') }}">
                                     <span data-text="Register for Global Alumni Summit 2026">Register for Global Alumni
                                         Summit 2026</span>
                                 </a>
