@@ -491,11 +491,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-3 text-end">
+                            {{-- <div class="mt-3 text-end">
                                 <button type="button" class="btn-pgi" onclick="checkMemberDetails()">
                                     <i class="feather-search"></i> Check member
                                 </button>
-                            </div>
+                            </div> --}}
                             <div id="memberLookupResult" class="mt-2"></div>
                         </div>
 

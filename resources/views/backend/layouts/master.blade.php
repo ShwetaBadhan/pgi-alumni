@@ -39,7 +39,7 @@
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
 
   <style>
-    /* SweetAlert ko chhota aur clean dikhane ke liye */
+   
     .swal2-popup {
       font-size: 1rem !important;
       width: 22em !important;
@@ -89,7 +89,7 @@
 
     @yield('content')
 
-    @include('backend.components.copyright')
+    {{-- @include('backend.components.copyright') --}}
 
   </main>
 

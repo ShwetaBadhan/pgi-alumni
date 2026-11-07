@@ -335,6 +335,123 @@
             </div>
         </div>
 
+                <!-- Accompanying Persons Card -->
+        @if($alumniRegistration->accompanyingPersons && $alumniRegistration->accompanyingPersons->isNotEmpty())
+        <div class="card mt-24">
+            <div class="card-header border-bottom py-12 px-20 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="ri-group-line me-2"></i>Accompanying Persons 
+                    <span class="badge bg-primary bg-opacity-10 text-primary ms-2">
+                        {{ $alumniRegistration->accompanyingPersons->count() }}
+                    </span>
+                </h5>
+            </div>
+            <div class="card-body p-20">
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Relation</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Is Alumni?</th>
+                                <th>Membership ID</th>
+                                <th>Wants Membership</th>
+                                <th>Charge</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($alumniRegistration->accompanyingPersons as $index => $person)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td class="fw-medium">
+                                    @if(!empty($person->title))
+                                        {{ $person->title }} 
+                                    @endif
+                                    {{ $person->name ?? 'N/A' }}
+                                </td>
+                                <td>{{ $person->relation ?? 'N/A' }}</td>
+                                <td>{{ $person->age ?? 'N/A' }}</td>
+                                <td>
+                                    @if($person->gender == 'Male')
+                                        <span class="text-primary">
+                                            <i class="ri-male-line me-1"></i>Male
+                                        </span>
+                                    @elseif($person->gender == 'Female')
+                                        <span class="text-primary">
+                                            <i class="ri-female-line me-1"></i>Female
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                            {{ $person->gender ?? 'N/A' }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($person->is_alumni)
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            <i class="ri-check-line me-1"></i>Yes
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">No</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($person->is_alumni && $person->alumni_membership_id)
+                                        <span class="fw-bold text-primary">{{ $person->alumni_membership_id }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($person->wants_membership)
+                                        <span class="badge bg-warning bg-opacity-10 text-warning">
+                                            <i class="ri-hourglass-line me-1"></i>Requested
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="fw-bold">₹{{ number_format($person->charge ?? 0, 2) }}</td>
+                                <td>
+                                    @if($person->charge > 0)
+                                        @php
+                                            $paidStatus = $person->payment_status ?? 'pending';
+                                            $badgeColors = [
+                                                'paid' => 'success',
+                                                'pending' => 'warning',
+                                                'waived' => 'info'
+                                            ];
+                                            $badgeColor = $badgeColors[$paidStatus] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge bg-{{ $badgeColor }} bg-opacity-10 text-{{ $badgeColor }}">
+                                            {{ ucfirst($paidStatus) }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-info bg-opacity-10 text-info">Free</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="8" class="text-end">Total Charge:</th>
+                                <th class="fw-bold text-primary">
+                                    ₹{{ number_format($alumniRegistration->accompanyingPersons->sum('charge'), 2) }}
+                                </th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Send Email Section -->
         <div class="card mt-24">
             <div class="card-header border-bottom py-12 px-20">

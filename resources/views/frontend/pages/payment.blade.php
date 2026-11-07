@@ -105,6 +105,12 @@
         .pgi-modal .reg-option input { margin: 0; }
         .pgi-modal .reg-option span { font-size: 16px; font-weight: 600; }
 
+        /* SweetAlert */
+        .swal2-popup { font-family: 'DM Sans', sans-serif; border-radius: 16px; padding: 28px 24px; }
+        .swal2-title { font-family: 'Fraunces', serif; font-size: 24px; color: #14263a; }
+        .swal2-html-container { font-size: 16px; color: #475569; }
+        .swal2-styled { border-radius: 10px !important; font-size: 15px !important; font-weight: 600 !important; padding: 10px 22px !important; }
+
         @media (max-width: 767px) {
             .pgi-pay { padding: 28px 0 40px; }
             .fee-row, .pgi-card-head, .pgi-card-body { padding-left: 16px; padding-right: 16px; }
@@ -216,8 +222,8 @@
                                                     <td class="amount">INR {{ number_format($person->charge, 2) }}</td>
                                                     <td>
                                                         <form action="{{ route('alumni.payment.delete-accompanying', $person->id) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to remove this person?');">
+                                                            method="POST" class="js-remove-form"
+                                                            data-name="{{ $person->title }} {{ $person->name }}">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn-danger-soft">
@@ -242,11 +248,11 @@
                             <span class="pgi-pill pill-warn">{{ ucfirst($user->status) }}</span>
                         </div>
 
-                        <div class="pgi-card-foot">
+                        {{-- <div class="pgi-card-foot">
                             <button type="button" class="btn-outline" data-bs-toggle="modal" data-bs-target="#editPreferenceModal">
                                 <i class="feather-edit"></i> Edit preference
                             </button>
-                        </div>
+                        </div> --}}
                     </div>
 
                     @if ($balanceDue > 0)
@@ -419,11 +425,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-3 text-end">
+                            {{-- <div class="mt-3 text-end">
                                 <button type="button" class="btn-pgi" onclick="checkMemberDetails()">
                                     <i class="feather-search"></i> Check member
                                 </button>
-                            </div>
+                            </div> --}}
                             <div id="memberLookupResult" class="mt-2"></div>
                         </div>
 
@@ -535,14 +541,37 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Confirm removal of an accompanying person with SweetAlert
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('.js-remove-form');
+            if (!form) return;
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Remove this person?',
+                text: (form.dataset.name || 'This person').trim() + ' will be removed and the charge will be updated.',
+                icon: 'warning',
+                showCancelButton: true,
+                reverseButtons: true,
+                focusCancel: true,
+                confirmButtonText: 'Yes, remove',
+                cancelButtonText: 'Keep',
+                confirmButtonColor: '#b3261e',
+                cancelButtonColor: '#64748b'
+            }).then(function (result) {
+                if (result.isConfirmed) form.submit();
+            });
+        });
+
         // Toggle Accompanying List Visibility
         function toggleAccompanyingList() {
             const listSection = document.getElementById('accompanyingListSection');
             const viewListBtn = document.getElementById('viewListBtn');
 
             if (!listSection || !viewListBtn) {
-                alert('No accompanying persons added yet!');
+                Swal.fire({ icon: 'info', title: 'Nothing to show', text: 'No accompanying persons added yet.', confirmButtonColor: '#1a1974' });
                 return;
             }
 

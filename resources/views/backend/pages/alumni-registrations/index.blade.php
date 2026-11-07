@@ -130,7 +130,7 @@
                     <!-- Data Table -->
                     <div class="p-0">
                         <div class="table-responsive">
-                            <table class="table bordered-table mb-0">
+                            <table class="table bordered-table mb-0 data-table" id="dataTable" data-page-length='10'>
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -331,10 +331,4 @@
     </div>
 @endsection
 
-@push('scripts')
-    <script>
-        // Initialize DataTables if you are using the jQuery plugin, otherwise remove this block.
-        // Since we are using server-side pagination via Laravel, standard DataTables JS is not strictly needed for paging, 
-        // but you can keep your custom search JS if you prefer client-side filtering.
-    </script>
-@endpush
+
