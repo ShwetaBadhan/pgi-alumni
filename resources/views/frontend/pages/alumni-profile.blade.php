@@ -107,7 +107,7 @@
             background: var(--teal); color: #fff; border: 0; border-radius: 10px;
             padding: 9px 18px; font-weight: 600; font-size: 14.4px; transition: background .2s;
         }
-        .pgi-profile .btn-pgi:hover { background: #0b5555; color: #fff; }
+        .pgi-profile .btn-pgi:hover { background: #4a478f; color: #fff; }
         .pgi-profile .btn-gold { background: var(--gold); color: #fff; border: 0; border-radius: 10px; padding: 9px 18px; font-weight: 600; font-size: 14.4px; }
         .pgi-profile .btn-gold:hover { background: #b0822f; color: #fff; }
         .pgi-profile .btn-ghost {
@@ -138,7 +138,7 @@
             background: var(--teal); color: #fff; border: 0; border-radius: 10px;
             padding: 10px 22px; font-weight: 600; transition: background .2s; cursor: pointer;
         }
-        .pgi-modal .btn-pgi:hover { background: #0b5555; color: #fff; }
+        .pgi-modal .btn-pgi:hover { background: #4a478f; color: #fff; }
         .pgi-modal .btn-light { background: #fff; border: 1px solid var(--line); color: var(--ink); }
         .pgi-modal :focus-visible { outline: 3px solid rgba(15, 107, 107, .4); outline-offset: 2px; }
         .pgi-modal .form-check-input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; }

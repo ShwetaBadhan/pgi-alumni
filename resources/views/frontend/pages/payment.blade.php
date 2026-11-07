@@ -53,7 +53,7 @@
 
         /* Buttons */
         .pgi-pay .btn-pgi, .pgi-modal .btn-pgi { background: var(--teal); color: #fff; border: 0; border-radius: 10px; padding: 10px 20px; font-weight: 600; font-size: 15px; line-height: 1.4; cursor: pointer; transition: background .2s; }
-        .pgi-pay .btn-pgi:hover, .pgi-modal .btn-pgi:hover { background: #0b5555; color: #fff; }
+        .pgi-pay .btn-pgi:hover, .pgi-modal .btn-pgi:hover { background: #4a478f; color: #fff; }
         .pgi-pay .btn-outline, .pgi-modal .btn-outline { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); border-radius: 10px; padding: 9px 20px; font-weight: 600; font-size: 15px; cursor: pointer; }
         .pgi-pay .btn-outline:hover { background: var(--teal-soft); }
         .pgi-pay .btn-danger-soft { background: #fff; color: var(--danger); border: 1px solid #f0c9c6; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; cursor: pointer; }
