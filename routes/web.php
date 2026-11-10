@@ -257,7 +257,12 @@ Route::middleware(['auth:alumni'])->group(function () {
 });
 
 Route::resource('abstract/submissions', AbstractSubmissionController::class)->names('abstract.submissions');
-// Ya manually:
-// Route::get('abstract/submissions/{submission}/edit', [AbstractSubmissionController::class, 'edit'])->name('abstract.submissions.edit');
-// Route::put('abstract/submissions/{submission}', [AbstractSubmissionController::class, 'update'])->name('abstract.submissions.update');
 Route::get('submissions/{submission}/export-word', [AbstractSubmissionController::class, 'exportWord'])->name('submissions.export-word');
+
+// Payment Receipt Route
+Route::get('alumni-payments/{payment}/receipt', [AlumniRegistrationController::class, 'showReceipt'])
+    ->name('alumni-payments.receipt');
+
+// Receipt Download Route
+Route::get('alumni-payments/{payment}/receipt/download', [AlumniRegistrationController::class, 'downloadReceipt'])
+    ->name('alumni-payments.receipt.download');

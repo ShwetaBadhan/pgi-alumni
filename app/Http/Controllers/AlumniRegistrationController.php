@@ -6,6 +6,7 @@ use App\Models\{AlumniRegistration, AlumniProfile, AlumniDocument, RegistrationT
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Hash, Http, Log, Storage};
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\AlumniRegistrationsExport;
 
 class AlumniRegistrationController extends Controller
@@ -657,4 +658,56 @@ class AlumniRegistrationController extends Controller
 
         return back()->with('success', 'Payment approved successfully!');
     }
+
+// Preview dikhane ke liye
+public function showReceipt(Payment $payment)
+{
+    $payment->load(['alumniRegistration.profile', 'alumniRegistration.registrationType']);
+    
+    $alumni = $payment->alumniRegistration;
+    $membershipId = $alumni->membership_id ?? 'N/A';
+    
+    // Amount in words
+    $amountWords = null;
+    if (class_exists('NumberFormatter')) {
+        $fmt = new NumberFormatter('en_IN', NumberFormatter::SPELLOUT);
+        $rupees = (int) floor($payment->amount);
+        $paise = (int) round(($payment->amount - $rupees) * 100);
+        $amountWords = ucfirst($fmt->format($rupees)) . ' rupees' . ($paise ? ' and ' . $fmt->format($paise) . ' paise' : '');
+    }
+
+    $data = compact('payment', 'alumni', 'membershipId', 'amountWords');
+    
+    // Preview view return karein
+    return view('backend.pages.alumni-registrations.receipt-preview', $data);
 }
+
+
+public function downloadReceipt(Payment $payment)
+{
+    $payment->load(['alumniRegistration.profile', 'alumniRegistration.registrationType']);
+    
+    $alumni = $payment->alumniRegistration;
+    $membershipId = $alumni->membership_id ?? 'N/A';
+    
+    // Amount in words
+    $amountWords = null;
+    if (class_exists('NumberFormatter')) {
+        $fmt = new NumberFormatter('en_IN', NumberFormatter::SPELLOUT);
+        $rupees = (int) floor($payment->amount);
+        $paise = (int) round(($payment->amount - $rupees) * 100);
+        $amountWords = ucfirst($fmt->format($rupees)) . ' rupees' . ($paise ? ' and ' . $fmt->format($paise) . ' paise' : '');
+    }
+
+    $data = compact('payment', 'alumni', 'membershipId', 'amountWords');
+    
+    // PDF generate 
+    $pdf = Pdf::loadView('backend.pages.alumni-registrations.receipt-pdf', $data);
+    
+    // PDF  download 
+    $filename = 'Receipt_PGAAS' . $payment->id . '_' . date('Y-m-d') . '.pdf';
+    return $pdf->download($filename);
+}
+   
+
+    }

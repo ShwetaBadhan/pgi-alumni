@@ -2,7 +2,7 @@
 
 return [
     'titles' => ['Dr.', 'Prof.', 'Mr.', 'Mrs.', 'Ms.'],
-    'degrees' => ['MD', 'DM', 'Junior Resident', 'Senior Resident'],
+    'degrees' => ['MD', 'DM'],
     'departments' => [
         'Anaesthesia',
         'Biophysics',

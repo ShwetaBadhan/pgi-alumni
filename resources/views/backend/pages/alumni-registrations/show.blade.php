@@ -179,162 +179,169 @@
 
       
         <!-- Payment Data Card -->
-        @php
-            $latestPayment = $alumniRegistration->payments->sortByDesc('created_at')->first();
-        @endphp
-        <div class="card mt-24">
-            <div class="card-header border-bottom py-12 px-20 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-semibold">Payment Data</h5>
-                @if ($latestPayment && $latestPayment->screenshot_path)
-                    <a href="{{ asset('storage/' . $latestPayment->screenshot_path) }}" target="_blank"
-                        class="text-primary text-decoration-none">
-                        <i class="ri-receipt-line"></i> View Latest Receipt
-                    </a>
-                @endif
-            </div>
-            <div class="card-body p-20">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <p class="text-muted small mb-1">Latest Amount Paid</p>
-                        <p class="fw-bold text-success mb-0">
-                            ₹{{ $latestPayment ? number_format($latestPayment->amount, 2) : '0.00' }}</p>
-                    </div>
-                    <div class="col-md-3">
-                        <p class="text-muted small mb-1">Transaction Date</p>
-                        <p class="fw-medium mb-0">
-                            {{ $latestPayment ? \Carbon\Carbon::parse($latestPayment->created_at)->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') : 'N/A' }}
-                        </p>
-                    </div>
-                    <div class="col-md-3">
-                        <p class="text-muted small mb-1">Transaction ID (UTR)</p>
-                        <p class="fw-medium mb-0 text-break">{{ $latestPayment->utr_number ?? 'N/A' }}</p>
-                    </div>
-                    <div class="col-md-3">
-                        <p class="text-muted small mb-1">Payment Status</p>
-                        <p class="fw-medium mb-0">
-                            @if ($latestPayment)
-                                <span
-                                    class="badge bg-{{ $latestPayment->status == 'pending' ? 'warning' : 'success' }} bg-opacity-10 text-{{ $latestPayment->status == 'pending' ? 'warning' : 'success' }}">
-                                    {{ ucfirst($latestPayment->status) }}
-                                </span>
-                            @else
-                                <span class="text-muted">No Payment Yet</span>
-                            @endif
-                        </p>
-                    </div>
-
-                    <!-- Screenshot Preview Section -->
-                    <div class="col-12 mt-3">
-                        <p class="text-muted small mb-2 fw-semibold">Latest Uploaded Payment Screenshot:</p>
-                        @if ($latestPayment && $latestPayment->screenshot_path)
-                            <div class="border rounded p-2 bg-light d-inline-block">
-                                <a href="{{ asset('storage/' . $latestPayment->screenshot_path) }}" target="_blank">
-                                    <img src="{{ asset('storage/' . $latestPayment->screenshot_path) }}"
-                                        alt="Payment Screenshot" class="img-fluid rounded shadow-sm"
-                                        style="max-height: 250px; max-width: 100%; object-fit: contain;">
-                                </a>
-                            </div>
-                            <div class="mt-2">
-                                <a href="{{ asset('storage/' . $latestPayment->screenshot_path) }}" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">
-                                    <i class="ri-external-link-line"></i> Open in New Tab
-                                </a>
-                            </div>
+    @php
+        $latestPayment = $alumniRegistration->payments->sortByDesc('created_at')->first();
+    @endphp
+    <div class="card mt-24">
+        <div class="card-header border-bottom py-12 px-20 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold">Payment Data</h5>
+            @if ($latestPayment && $latestPayment->screenshot_path)
+                <a href="{{ route('alumni-payments.receipt', $latestPayment->id) }}" target="_blank"
+                    class="btn btn-sm btn-primary">
+                    <i class="ri-receipt-line"></i> View Latest Receipt
+                </a>
+            @endif
+        </div>
+        <div class="card-body p-20">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <p class="text-muted small mb-1">Latest Amount Paid</p>
+                    <p class="fw-bold text-success mb-0">
+                        ₹{{ $latestPayment ? number_format($latestPayment->amount, 2) : '0.00' }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="text-muted small mb-1">Transaction Date</p>
+                    <p class="fw-medium mb-0">
+                        {{ $latestPayment ? \Carbon\Carbon::parse($latestPayment->created_at)->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') : 'N/A' }}
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <p class="text-muted small mb-1">Transaction ID (UTR)</p>
+                    <p class="fw-medium mb-0 text-break">{{ $latestPayment->utr_number ?? 'N/A' }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p class="text-muted small mb-1">Payment Status</p>
+                    <p class="fw-medium mb-0">
+                        @if ($latestPayment)
+                            <span
+                                class="badge bg-{{ $latestPayment->status == 'pending' ? 'warning' : 'success' }} bg-opacity-10 text-{{ $latestPayment->status == 'pending' ? 'warning' : 'success' }}">
+                                {{ ucfirst($latestPayment->status) }}
+                            </span>
                         @else
-                            <span class="badge bg-secondary">No Screenshot Uploaded Yet</span>
+                            <span class="text-muted">No Payment Yet</span>
                         @endif
-                    </div>
+                    </p>
                 </div>
 
-                @if ($alumniRegistration->payments->isNotEmpty())
-                    <hr class="my-3">
-                    <h6 class="fw-semibold mb-3">Complete Payment History</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Gateway</th>
-                                    <th>UTR / Transaction ID</th>
-                                    <th>Amount</th>
-                                    <th>Type</th>
-                                    <th>Screenshot</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($alumniRegistration->payments->sortByDesc('created_at') as $payment)
-                                    <tr>
-                                        <td class="text-uppercase small">{{ $payment->gateway }}</td>
-                                        <td class="fw-bold text-primary small">
-                                            {{ $payment->utr_number ?? ($payment->gateway_payment_id ?? '-') }}</td>
-                                        <td class="fw-medium">₹{{ number_format($payment->amount, 2) }}</td>
-                                        <td>
-                                            @if ($payment->type == 'donation')
-                                                <span class="badge text-white"
-                                                    style="background-color: #6f42c1; font-size: 0.75rem;">Donation</span>
-                                            @elseif($payment->type == 'accompanying')
-                                                <span class="badge bg-info text-dark"
-                                                    style="font-size: 0.75rem;">Accompanying</span>
-                                            @else
-                                                <span class="badge bg-primary"
-                                                    style="font-size: 0.75rem;">Membership</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($payment->screenshot_path)
-                                                <a href="{{ asset('storage/' . $payment->screenshot_path) }}"
-                                                    target="_blank" class="btn btn-sm btn-outline-info">
-                                                    <i class="ri-image-line"></i> View
-                                                </a>
-                                            @else
-                                                <span class="text-muted small">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @php
-                                                $pColors = [
-                                                    'success' => 'success',
-                                                    'pending' => 'warning',
-                                                    'failed' => 'danger',
-                                                    'refunded' => 'secondary',
-                                                ];
-                                                $pColor = $pColors[$payment->status] ?? 'secondary';
-                                            @endphp
-                                            <span
-                                                class="badge bg-{{ $pColor }} bg-opacity-10 text-{{ $pColor }}">
-                                                {{ ucfirst($payment->status) }}
-                                            </span>
-                                        </td>
-                                        <td class="small">
-                                            {{ \Carbon\Carbon::parse($payment->created_at)->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') }}</td>
-                                        <td>
-                                            @if ($payment->status == 'pending')
-                                                <div class="d-flex gap-1">
-                                                    <form action="{{ route('alumni-payments.approve', $payment->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Approve this payment?')">
-                                                            <i class="ri-check-line"></i>
-                                                        </button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectPayment({{ $payment->id }})">
-                                                        <i class="ri-close-line"></i>
-                                                    </button>
-                                                </div>
-                                            @else
-                                                <span class="text-muted small">-</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                <!-- Screenshot Preview Section -->
+                <div class="col-12 mt-3">
+                    <p class="text-muted small mb-2 fw-semibold">Latest Uploaded Payment Screenshot:</p>
+                    @if ($latestPayment && $latestPayment->screenshot_path)
+                        <div class="border rounded p-2 bg-light d-inline-block">
+                            <a href="{{ asset('storage/' . $latestPayment->screenshot_path) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $latestPayment->screenshot_path) }}"
+                                    alt="Payment Screenshot" class="img-fluid rounded shadow-sm"
+                                    style="max-height: 250px; max-width: 100%; object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{{ asset('storage/' . $latestPayment->screenshot_path) }}" target="_blank"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="ri-external-link-line"></i> Open in New Tab
+                            </a>
+                        </div>
+                    @else
+                        <span class="badge bg-secondary">No Screenshot Uploaded Yet</span>
+                    @endif
+                </div>
             </div>
-        </div>
 
+            @if ($alumniRegistration->payments->isNotEmpty())
+                <hr class="my-3">
+                <h6 class="fw-semibold mb-3">Complete Payment History</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Gateway</th>
+                                <th>UTR / Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Type</th>
+                                <th>Screenshot</th>
+                                <th>Receipt</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($alumniRegistration->payments->sortByDesc('created_at') as $payment)
+                                <tr>
+                                    <td class="text-uppercase small">{{ $payment->gateway }}</td>
+                                    <td class="fw-bold text-primary small">
+                                        {{ $payment->utr_number ?? ($payment->gateway_payment_id ?? '-') }}</td>
+                                    <td class="fw-medium">₹{{ number_format($payment->amount, 2) }}</td>
+                                    <td>
+                                        @if ($payment->type == 'donation')
+                                            <span class="badge text-white"
+                                                style="background-color: #6f42c1; font-size: 0.75rem;">Donation</span>
+                                        @elseif($payment->type == 'accompanying')
+                                            <span class="badge bg-info text-dark"
+                                                style="font-size: 0.75rem;">Accompanying</span>
+                                        @else
+                                            <span class="badge bg-primary"
+                                                style="font-size: 0.75rem;">Membership</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($payment->screenshot_path)
+                                            <a href="{{ asset('storage/' . $payment->screenshot_path) }}"
+                                                target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="ri-image-line"></i> View
+                                            </a>
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('alumni-payments.receipt', $payment->id) }}" 
+                                            target="_blank" 
+                                            class="btn btn-sm btn-outline-success">
+                                            <i class="ri-file-pdf-line"></i> Receipt
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $pColors = [
+                                                'success' => 'success',
+                                                'pending' => 'warning',
+                                                'failed' => 'danger',
+                                                'refunded' => 'secondary',
+                                            ];
+                                            $pColor = $pColors[$payment->status] ?? 'secondary';
+                                        @endphp
+                                        <span
+                                            class="badge bg-{{ $pColor }} bg-opacity-10 text-{{ $pColor }}">
+                                            {{ ucfirst($payment->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="small">
+                                        {{ \Carbon\Carbon::parse($payment->created_at)->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') }}</td>
+                                    <td>
+                                        @if ($payment->status == 'pending')
+                                            <div class="d-flex gap-1">
+                                                <form action="{{ route('alumni-payments.approve', $payment->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Approve this payment?')">
+                                                        <i class="ri-check-line"></i>
+                                                    </button>
+                                                </form>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="rejectPayment({{ $payment->id }})">
+                                                    <i class="ri-close-line"></i>
+                                                </button>
+                                            </div>
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
                 <!-- Accompanying Persons Card -->
         @if($alumniRegistration->accompanyingPersons && $alumniRegistration->accompanyingPersons->isNotEmpty())
         <div class="card mt-24">
@@ -536,7 +543,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Yahan aap reject payment ka route add kar sakte hain
+                    
                     Swal.fire('Rejected!', 'Payment has been rejected.', 'success');
                 }
             });

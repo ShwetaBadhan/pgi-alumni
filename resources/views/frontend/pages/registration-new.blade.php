@@ -152,8 +152,8 @@
                 <div class="invite">
                     <div class="ico"><i class="feather-info"></i></div>
                     <div>
-                        <h5>Special invitation for MD, DM, Junior Resident and Senior Resident alumni</h5>
-                        <p>We are currently accepting registrations only for <strong>MD, DM, Junior Resident and Senior Resident</strong> degree holders. As a special benefit, your <strong>Alumni Meet (Summit) is absolutely FREE</strong> with your membership.</p>
+                        <h5>Special invitation for MD & DM alumni</h5>
+                        <p>We are currently accepting registrations only for <strong>MD and DM</strong> degree holders. As a special benefit, your <strong>Alumni Meet (Summit) is absolutely FREE</strong> with your membership.</p>
                     </div>
                 </div>
 
