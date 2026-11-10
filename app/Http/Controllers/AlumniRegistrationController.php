@@ -660,75 +660,84 @@ class AlumniRegistrationController extends Controller
     }
 
     // Preview dikhane ke liye
+       // Preview dikhane ke liye
     public function showReceipt(Payment $payment)
     {
         $payment->load(['alumniRegistration.profile', 'alumniRegistration.registrationType']);
 
+        if (!$payment->alumniRegistration) {
+            abort(404, 'Alumni registration not found for this payment');
+        }
+
         $alumni = $payment->alumniRegistration;
         $membershipId = $alumni->membership_id ?? 'N/A';
 
-        // Amount in words (Safe for Shared Hosting)
-        $amountWords = null;
+        // ✅ SAFE AMOUNT TO WORDS CONVERSION
+        $amountWords = number_format($payment->amount, 2) . ' INR only'; // Default fallback
 
-        // Check if intl extension is enabled
-        if (class_exists('NumberFormatter')) {
+        // Check if global \NumberFormatter class exists (requires 'intl' extension)
+        if (class_exists('\NumberFormatter')) {
             try {
-                $fmt = new NumberFormatter('en_IN', NumberFormatter::SPELLOUT);
+                // ✅ Notice the backslash (\) before NumberFormatter
+                $fmt = new \NumberFormatter('en_IN', \NumberFormatter::SPELLOUT);
                 $rupees = (int) floor($payment->amount);
                 $paise = (int) round(($payment->amount - $rupees) * 100);
-                $amountWords = ucfirst($fmt->format($rupees)) . ' rupees' . ($paise ? ' and ' . $fmt->format($paise) . ' paise' : '');
+                
+                $words = ucfirst($fmt->format($rupees)) . ' rupees';
+                if ($paise > 0) {
+                    $words .= ' and ' . $fmt->format($paise) . ' paise';
+                }
+                $amountWords = $words . ' only';
             } catch (\Exception $e) {
-                $amountWords = null; // Fallback if it fails
+                // Agar koi bhi error aaye, toh default fallback use karein
+                $amountWords = number_format($payment->amount, 2) . ' INR only';
             }
-        }
-
-
-        if (!$amountWords) {
-            $amountWords = number_format($payment->amount, 2) . ' INR';
         }
 
         $data = compact('payment', 'alumni', 'membershipId', 'amountWords');
 
-        // Preview view return karein
         return view('backend.pages.alumni-registrations.receipt-preview', $data);
     }
 
 
+    // PDF download karne ke liye
     public function downloadReceipt(Payment $payment)
     {
         $payment->load(['alumniRegistration.profile', 'alumniRegistration.registrationType']);
 
+        if (!$payment->alumniRegistration) {
+            abort(404, 'Alumni registration not found for this payment');
+        }
+
         $alumni = $payment->alumniRegistration;
         $membershipId = $alumni->membership_id ?? 'N/A';
 
-        // Amount in words
-        // Amount in words (Safe for Shared Hosting)
-        $amountWords = null;
+        // ✅ SAFE AMOUNT TO WORDS CONVERSION (Same logic)
+        $amountWords = number_format($payment->amount, 2) . ' INR only';
 
-        // Check if intl extension is enabled
-        if (class_exists('NumberFormatter')) {
+        if (class_exists('\NumberFormatter')) {
             try {
-                $fmt = new NumberFormatter('en_IN', NumberFormatter::SPELLOUT);
+                $fmt = new \NumberFormatter('en_IN', \NumberFormatter::SPELLOUT);
                 $rupees = (int) floor($payment->amount);
                 $paise = (int) round(($payment->amount - $rupees) * 100);
-                $amountWords = ucfirst($fmt->format($rupees)) . ' rupees' . ($paise ? ' and ' . $fmt->format($paise) . ' paise' : '');
+                
+                $words = ucfirst($fmt->format($rupees)) . ' rupees';
+                if ($paise > 0) {
+                    $words .= ' and ' . $fmt->format($paise) . ' paise';
+                }
+                $amountWords = $words . ' only';
             } catch (\Exception $e) {
-                $amountWords = null; // Fallback if it fails
+                $amountWords = number_format($payment->amount, 2) . ' INR only';
             }
-        }
-
-
-        if (!$amountWords) {
-            $amountWords = number_format($payment->amount, 2) . ' INR';
         }
 
         $data = compact('payment', 'alumni', 'membershipId', 'amountWords');
 
-        // PDF generate 
-        $pdf = Pdf::loadView('backend.pages.alumni-registrations.receipt-pdf', $data);
+        // PDF generate karein
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.pages.alumni-registrations.receipt-pdf', $data);
 
-        // PDF  download 
-        $filename = 'Receipt_PGAAS' . $payment->id . '_' . date('Y-m-d') . '.pdf';
+        // PDF download karwayein
+        $filename = 'Receipt_PCAAS' . $payment->id . '_' . date('Y-m-d') . '.pdf';
         return $pdf->download($filename);
     }
 }
